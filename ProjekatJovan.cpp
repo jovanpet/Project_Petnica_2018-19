@@ -466,6 +466,18 @@ int convert()   //prebacuje maricu ruta u niz bez "t"
 	return y;
 }
 
+string* podeli(string a)
+{
+	std::stringstream test1(a);
+	std::string segment;
+	std::vector<std::string> seglist;
+	while(std::getline(test1, segment, ' '))
+	{
+   		seglist.push_back(segment);
+	}
+}
+
+
 string crossover_s(string a, string b,int p)
 {
 	std::stringstream test1(a);
@@ -481,34 +493,48 @@ string crossover_s(string a, string b,int p)
 	{
    		seglist1.push_back(segment);
 	}
-	int ind=0; string s;
+	string s; int c; int d; string inti;
+	inti =covert_int_to_string(p);
+	
 	for(int i=0; i<seglist.size(); i++)
 	{
-		for(int j=0; j<seglist1.size(); j++)
+		if(seglist[i]==inti)
 		{
-			if(seglist[i]==seglist1[j] && atoi(seglist[i].c_str())==p)
-			{
-				 int k;
-				for(int lo=0; lo<=j; lo++)
-				{
-					s+=seglist1[lo];
-				}
-				for(int lo=i+1; lo<seglist.size(); lo++)
-				{
-					s+=seglist[lo];
-				}
-				break; ind =1;
-			}
-			if(ind==1)
-			{
-				break;
-			}
-		}
-		if(ind==1)
-		{
+			c=i;
 			break;
+		}	
+	}
+	for(int i=0; i<seglist1.size(); i++)
+	{
+		if(seglist1[i]==inti)
+		{
+			d=i;
+			break;
+		}	
+	}
+	for(int i=0; i<c; i++)
+	{
+		if(c==d && i==seglist.size())
+		{
+			s+=seglist[i];
+		}
+		else
+		{
+		s+=seglist[i]+" ";
 		}
 	}
+	for(int i=d; i<seglist1.size(); i++)
+	{
+		if(i==seglist.size())
+		{
+			s+=seglist[i];
+		}
+		else
+		{
+		s+=seglist[i]+" ";
+		}
+	}
+	
 	return s;
 }
 
@@ -632,10 +658,10 @@ main()
 						ran=*(lol+ran);
 						string koj;
 						koj=ga[i][mesta[brute-1]];
-						cout<<koj<<"| "<<ga[i][mesta[brute-2]]<<" "<<rand<<" "<<kol;
+						cout<<koj<<"| "<<ga[i][mesta[brute-2]]<<" "<<ran<<endl;
 						ga[i][mesta[brute-1]]=crossover_s(koj,ga[i][mesta[brute-2]],ran);
 						ga[i][mesta[brute-2]]=crossover_s(ga[i][mesta[brute-2]],koj,ran);
-   					
+   						cout<<koj<<"| "<<ga[i][mesta[brute-2]]<<endl;
    				
 			}
 		}
