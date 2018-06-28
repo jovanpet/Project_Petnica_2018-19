@@ -18,17 +18,18 @@ int Tij[100][100];       //najbrzi put izmedju i->j
 float IVT[100][100];     //x
 int time1[100][100];     //vreme izmedju svake dir povezane rute
 int need[100][100];      //need izmedju i j
-int satis[100][100];     //kome je satsified a kome nije need
 string rute[100][100];   //sve rute izmedju dve (t znaci da ne postoji ruta izmedju njih !!!)
 string rfilter[10000];   //niz  
 int ruta[100];           //ness pomocno
 int n;  int duzina;      //n-broj noda duzina-ness pomocno
 float K; float xm;       //K,xm-const          menjam po slucaju!!!
-int brute;               //broj ruta u grafu   menjam po slucaju!!!
-float af2=1;               //konstanta za F2
+int brute=4;               //broj ruta u grafu   menjam po slucaju!!!
+float af2=1;             //konstanta za F2
 int transfer[100][100];  //matrica transfera
-int U;                   //penalty
-
+int U=7;                   //penalty
+int pop=20;         	//populacija koju koriatim
+int generacion=1;		//broj generacija
+int m=5;				//povecanje N
 
 string coverter_int_array_to_string(int niz[], int broj,int src)
 {
@@ -177,25 +178,43 @@ void generate_need()                //generise potrebu izmedju i j
 	}
 }
 
-int preklapanje(string k, string t) //vraca int gde se preklapaju
+int * preklapanje(string k, string t) //vraca niz gde se preklapaju
 {
 	std::stringstream test(k);
 	std::string segment;
 	std::vector<std::string> seglist;
-
+	static int ro[105];                           //niz noda koje preseca
+	ro[0]=-1;
 	while(std::getline(test, segment, ' '))
 	{
    		seglist.push_back(segment);
 	}
+	int g=0;
 	
 	for(int i=0; i<seglist.size(); i++)
 	{
 		if (t.find(seglist[i]) != std::string::npos)
 		{
-    		return atoi(seglist[i].c_str());
+			if(i+1==seglist.size())
+			{
+				ro[g]=atoi(seglist[i].c_str());
+    			g++;
+    			ro[g]=-1;
+    		}
+    		else if(t.find(seglist[i+1]) != std::string::npos)
+    		{
+    			//:)
+			}
+			else
+			{
+				ro[g]=atoi(seglist[i].c_str());
+    			g++;
+    			ro[g]=-1;
+			}
 		}
 	}
-	return -1;
+	
+	return ro;
 }
 
 bool pronadji(int i, string k)      //pronalazi odredjenu nodu u stringu noda
@@ -220,45 +239,46 @@ int mini(int min, int u)            //odredjuje min
 	}
 }
 
-int IVTnum(int i,int j,string rset[])  //racuna vreme koje je potrebno i j koristeci set ruta r
+int IVTnum(int i,int j,string rset[])                              //racuna vreme koje je potrebno i j koristeci set ruta r
 {
-	int odradjen[100];                              //niz koriscenih ruta
-	int min=INT_MAX;                                //ako ostane INT_MAX nije povezan sa j
-	int ukupno;                                     //ukupno vreme
+	int odradjen[100];                                             //niz koriscenih ruta
+	int min=INT_MAX;                                               //ako ostane INT_MAX nije povezan sa j
+	int ukupno;                                                    //ukupno vreme
 	
-	for(int no=0; no<brute; no++)                     //postavi niz na nulu
+	for(int no=0; no<brute; no++)                                  //postavi niz na nulu
 	{
 		odradjen[no]=0; 
 	}
 	
 	for(int p=0; p<brute ; p++)
 	{ 
-		if(pronadji(i,rset[p])==true)              //pronadji pocetnu nodu u ruti
+		if(pronadji(i,rset[p])==true)                              //pronadji pocetnu nodu u ruti
 		{
 			ukupno=0;
-			odradjen[p]=1;                         //postavi je na predjenu
-			if(pronadji(j,rset[p])==true)          //da li je u njoj j kraj
+			odradjen[p]=1;                                         //postavi je na predjenu
+			if(pronadji(j,rset[p])==true)                          //da li je u njoj j kraj
 			{
-					ukupno+=Tij[i][j];             //break;
+					ukupno+=Tij[i][j];                              
 					min=mini(min,ukupno);
 					ukupno-=Tij[i][j];
 			}
 			else
 			{	
-				for(int o=0; o<brute ; o++) //gleda da li ima preklapanja sa nekom rutom
+				for(int o=0; o<brute ; o++)                          //gleda da li ima preklapanja sa nekom rutom
 				{
-					if(odradjen[o]!=1)      //da li je vec iskoriscen
+					if(odradjen[o]!=1)                               //da li je vec iskoriscen
 					{
-						int jol=preklapanje(rset[p],rset[o]);
-						if(jol!=-1) //ako se preklopi idi dalje
+						int *jol;
+						jol=preklapanje(rset[p],rset[o]);
+						for(int ko=0; *(jol+ko)!=-1; ko++)
 						{
 							odradjen[o]=1;
-							ukupno+=Tij[i][jol]+U;
-							if(pronadji(j,rset[o])==true) //da li je u njoj i kraj
+							ukupno+=Tij[i][*(jol+ko)]+U;
+							if(pronadji(j,rset[o])==true)             //da li je u njoj i kraj
 							{
-								ukupno+=Tij[jol][j]; //break;
+								ukupno+=Tij[*(jol+ko)][j];                 
 								min=mini(min,ukupno);
-								ukupno-=Tij[jol][j];
+								ukupno-=Tij[*(jol+ko)][j];
 							}
 							else
 							{	
@@ -266,23 +286,24 @@ int IVTnum(int i,int j,string rset[])  //racuna vreme koje je potrebno i j koris
 								{
 									if(odradjen[c]!=1)                   //da li je vec iskoriscen
 									{
-										int pol=preklapanje(rset[o],rset[c]);
-										ukupno+=Tij[jol][pol]+U;
-										if(pol!=-1)                       //ako se preklopi idi dalje
+										int *pol;
+										pol=preklapanje(rset[o],rset[c]);
+										for(int ho=0;*(pol+ho)!=-1; ho++ )
 										{
-											if(pronadji(j,rset[c])==true) //da li je u njoj i kraj
+											ukupno+=Tij[*(jol+ko)][*(pol+ho)]+U;
+											if(pronadji(j,rset[c])==true)         //da li je u njoj kraj
 											{
-												ukupno+=Tij[pol][j];
+												ukupno+=Tij[*(pol+ho)][j];
 												min=mini(min,ukupno);
-												ukupno-=Tij[pol][j];
+												ukupno-=Tij[*(pol+ho)][j];
 											}
+											ukupno-=(Tij[*(jol+ko)][*(pol+ho)]+U);
 										}
-										ukupno-=(Tij[jol][pol]+U);
 									}
 								}
 							}
 							odradjen[o]=0;
-							ukupno-=(Tij[i][jol]+U); 
+							ukupno-=(Tij[i][*(jol+ko)]+U); 
 						}
 					}
 				}
@@ -394,7 +415,7 @@ float F()
 bool sorti (int i,int j) 
 { return (i>j); }
 
-void filter()
+void filter()   //filter od matrice skidamo preklapanje :)
 {
 	int k=1;
 	for(int p=0; p<5; p++)
@@ -426,7 +447,7 @@ void filter()
 }
 }
 
-void convert()
+int convert()   //prebacuje maricu ruta u niz bez "t"
 {
 	int k=1;
 	int y=0;
@@ -442,30 +463,209 @@ void convert()
 		}
 		k++;
 	}
+	return y;
+}
+
+
+string crossover_s(string a, string b,int p)
+{
+	std::stringstream test1(a);
+	std::string segment;
+	std::vector<std::string> seglist;
+	while(std::getline(test1, segment, ' '))
+	{
+   		seglist.push_back(segment);
+	}
+	std::stringstream test2(b);
+	std::vector<std::string> seglist1;
+	while(std::getline(test2, segment, ' '))
+	{
+   		seglist1.push_back(segment);
+	}
+	int ind=0; string s;
+	for(int i=0; i<seglist.size(); i++)
+	{
+		for(int j=0; j<seglist1.size(); j++)
+		{
+			if(seglist[i]==seglist1[j] && atoi(seglist[i].c_str())==p)
+			{
+				 int k;
+				for(int lo=0; lo<=j; lo++)
+				{
+					s+=seglist1[lo];
+				}
+				for(int lo=i+1; lo<seglist.size(); lo++)
+				{
+					s+=seglist[lo];
+				}
+				break; ind =1;
+			}
+			if(ind==1)
+			{
+				break;
+			}
+		}
+		if(ind==1)
+		{
+			break;
+		}
+	}
+	return s;
 }
 
 main()
-{
+{   string rset[500];
+	float popularity[10000];
 	srand(time(0));
 	scanf("%d",&n);
 	generate_time();
 	generate_need();
-	for(int i=0; i<n-1 ;i++)
+	for(int i=0; i<n-1 ;i++) //pokretanje dijkstre za const
 	{
     	dijkstra(time1, i,n);
 	}	
+	
 	filter();
-	convert();   
-	/*for(int i=0; i<n; i++)
+	int br=convert();   
+	
+	string ga[500][500];
+	
+	int mesta[br];
+	
+	for(int i=0; i<br; i++)
 	{
-		for(int j=0; j<n; j++)
+		mesta[i]=i;
+	}
+
+	int t;
+    int g;
+    int ind;
+	for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
+	{
+		for(int j=0; j<brute; j++)
 		{
-			cout<<rute[i][j]<<" 1| ";
+   			t=rand()%(br-j);
+   			g=mesta[t];
+   			mesta[t]=mesta[br-1-j];
+   			mesta[br-1-j]=g;
+   			ga[i][j]=rfilter[g];
+   			g=0; t=0;
 		}
-		cout<<endl;
-	}         */
+	}
+
+	for(int fo=0; fo<generacion; fo++)       //geneticki
+	{
+		for(int i=0; i<pop; i=i+2)
+		{
+			for(int j=0; j<brute; j++)      //inter-string crossover sa koef 0.5
+			{
+				if(rand()%2==0)
+				{
+					string pomocni=ga[i][j];
+					ga[i][j]=ga[i+1][j];
+					ga[i+1][j]=pomocni;
+				}
+			}
+		}
+	
+		/*for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
+			{
+				for(int j=0; j<brute; j++)
+				{
+					cout<<ga[i][j]<<" | ";
+				}
+				cout<<endl;
+			}*/
+		cout<<"J";
+		for(int moe=2; moe<=m; moe++)					//prosiruje matricu ga na N*m
+		{
+			for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
+			{
+				for(int j=0; j<brute; j++)
+				{
+					ga[i*moe][j]=ga[i][j];
+				}
+			}
+		}
+		
+		cout<<"o";
+		for(int i=0; i<pop*m; i++)					//inter-string crossover sa koef 0.5
+		{	
+			ind=0;
+			for(int j=0; j<brute; j++)      
+			{
+				for(int ho=0; ho<brute; ho++)
+				{
+					if(ho!=j)
+					{
+						int *g;
+   						g=preklapanje(ga[i][mesta[j]],ga[i][mesta[ho]]);
+						if(*g!=-1)
+						{
+							ind=1;
+							break;
+						}
+					}
+				}
+				if(ind=1)
+				{
+					break;
+				}
+			}
+			if(ind=1)
+			{
+					for(int plo=0; plo<2; plo++)
+  					{
+    					int t;
+    					int g;
+   						t=rand()%(brute-plo);
+   						g=mesta[t];
+   						mesta[t]=mesta[brute-1-plo];
+   						mesta[brute-1-plo]=g;
+   					}
+   					int *g;
+   					g=preklapanje(ga[i][mesta[brute-1]],ga[i][mesta[brute-2]]);
+   					while(*g==-1)
+   					{
+   						for(int plo=0; plo<2; plo++)
+  						{
+    						int t;
+    						int g;
+   							t=rand()%(brute-plo);
+   							g=mesta[t];
+   							mesta[t]=mesta[brute-1-plo];
+   							mesta[brute-1-plo]=g;
+   						}
+							g=preklapanje(ga[i][mesta[brute-1]],ga[i][mesta[brute-2]]);	
+					}
+						int kol;
+						for(kol=0; *(g+kol)!=-1; kol++);
+						int ran=rand()%kol;
+						ran=*(g+kol);
+						string koj;
+						koj=ga[i][mesta[brute-1]];
+						cout<<koj<<"| "<<ga[i][mesta[brute-2]]<<" "<<rand<<" "<<kol;
+						//return 0;
+						ga[i][mesta[brute-1]]=crossover_s(koj,ga[i][mesta[brute-2]],ran);
+						ga[i][mesta[brute-2]]=crossover_s(ga[i][mesta[brute-2]],koj,ran);
+   					
+   				
+		}
+		}
+		cout<<"v";
+		for(int i=0; i<pop*m; i++)
+		{
+			for(int j=0; j<brute; j++)      		//inter-string crossover sa koef 0.5
+			{
+				rset[j]=ga[i][j];
+			}
+			generate_IVT(rset);
+			
+			popularity[i]=F();
+		}
+	}
+	
 	//do ovde je za IRSA
-	//string rset[100];    //nalazi mi se kao potrteba za IVT
 }
 
 
