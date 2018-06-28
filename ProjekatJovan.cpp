@@ -23,7 +23,7 @@ string rfilter[10000];   //niz
 int ruta[100];           //ness pomocno
 int n;  int duzina;      //n-broj noda duzina-ness pomocno
 float K; float xm;       //K,xm-const          menjam po slucaju!!!
-int brute=4;               //broj ruta u grafu   menjam po slucaju!!!
+int brute=5;               //broj ruta u grafu   menjam po slucaju!!!
 float af2=1;             //konstanta za F2
 int transfer[100][100];  //matrica transfera
 int U=7;                   //penalty
@@ -466,7 +466,6 @@ int convert()   //prebacuje maricu ruta u niz bez "t"
 	return y;
 }
 
-
 string crossover_s(string a, string b,int p)
 {
 	std::stringstream test1(a);
@@ -513,6 +512,26 @@ string crossover_s(string a, string b,int p)
 	return s;
 }
 
+bool moze(string ga[500][500],int i)				//da li moze da se izvrsi instra cross over na odredjeni set
+{
+			int *g;
+			for(int j=0; j<brute; j++)      
+			{
+				for(int ho=0; ho<brute; ho++)
+				{
+					if(ho!=j)
+					{
+   						g=preklapanje(ga[i][j],ga[i][ho]);
+						if(*g!=-1)
+						{
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+}
+
 main()
 {   string rset[500];
 	float popularity[10000];
@@ -529,7 +548,9 @@ main()
 	int br=convert();   
 	
 	string ga[500][500];
-	
+	int t;
+    int g;
+    int ind;
 	int mesta[br];
 	
 	for(int i=0; i<br; i++)
@@ -537,9 +558,6 @@ main()
 		mesta[i]=i;
 	}
 
-	int t;
-    int g;
-    int ind;
 	for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
 	{
 		for(int j=0; j<brute; j++)
@@ -567,15 +585,6 @@ main()
 				}
 			}
 		}
-	
-		/*for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
-			{
-				for(int j=0; j<brute; j++)
-				{
-					cout<<ga[i][j]<<" | ";
-				}
-				cout<<endl;
-			}*/
 		cout<<"J";
 		for(int moe=2; moe<=m; moe++)					//prosiruje matricu ga na N*m
 		{
@@ -587,70 +596,48 @@ main()
 				}
 			}
 		}
-		
 		cout<<"o";
+		for(int i=0; i<brute; i++)
+		{
+			mesta[i]=i;
+		}
+		
 		for(int i=0; i<pop*m; i++)					//inter-string crossover sa koef 0.5
 		{	
-			ind=0;
-			for(int j=0; j<brute; j++)      
-			{
-				for(int ho=0; ho<brute; ho++)
-				{
-					if(ho!=j)
-					{
-						int *g;
-   						g=preklapanje(ga[i][mesta[j]],ga[i][mesta[ho]]);
-						if(*g!=-1)
-						{
-							ind=1;
-							break;
-						}
-					}
-				}
-				if(ind=1)
-				{
-					break;
-				}
-			}
-			if(ind=1)
+			if(moze(ga,i))
 			{
 					for(int plo=0; plo<2; plo++)
   					{
-    					int t;
-    					int g;
    						t=rand()%(brute-plo);
    						g=mesta[t];
    						mesta[t]=mesta[brute-1-plo];
    						mesta[brute-1-plo]=g;
    					}
-   					int *g;
-   					g=preklapanje(ga[i][mesta[brute-1]],ga[i][mesta[brute-2]]);
-   					while(*g==-1)
+   					int *lol;
+   					lol=preklapanje(ga[i][mesta[brute-1]],ga[i][mesta[brute-2]]);
+   					while(*lol==-1)
    					{
    						for(int plo=0; plo<2; plo++)
   						{
-    						int t;
-    						int g;
    							t=rand()%(brute-plo);
    							g=mesta[t];
    							mesta[t]=mesta[brute-1-plo];
    							mesta[brute-1-plo]=g;
    						}
-							g=preklapanje(ga[i][mesta[brute-1]],ga[i][mesta[brute-2]]);	
+							lol=preklapanje(ga[i][mesta[brute-1]],ga[i][mesta[brute-2]]);
 					}
 						int kol;
-						for(kol=0; *(g+kol)!=-1; kol++);
+						for(kol=0; *(lol+kol)!=-1; kol++);
 						int ran=rand()%kol;
-						ran=*(g+kol);
+						ran=*(lol+ran);
 						string koj;
 						koj=ga[i][mesta[brute-1]];
 						cout<<koj<<"| "<<ga[i][mesta[brute-2]]<<" "<<rand<<" "<<kol;
-						//return 0;
 						ga[i][mesta[brute-1]]=crossover_s(koj,ga[i][mesta[brute-2]],ran);
 						ga[i][mesta[brute-2]]=crossover_s(ga[i][mesta[brute-2]],koj,ran);
    					
    				
-		}
+			}
 		}
 		cout<<"v";
 		for(int i=0; i<pop*m; i++)
