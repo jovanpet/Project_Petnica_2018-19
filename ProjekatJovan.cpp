@@ -29,7 +29,7 @@ float af2=1;             //konstanta za F2
 int transfer[100][100];  //matrica transfera
 int U=7;                   //penalty
 int pop=5;         	//populacija koju koriatim
-int generacion=20;		//broj generacija
+int generacion=1;		//broj generacija
 int m=3;				//povecanje N
 
 struct Comp
@@ -180,7 +180,22 @@ float beta1_generator()  //generise beta1
 	float i = 0, d = 0, j=0;
     i = rand() %(K+1); 
     j=rand()% xm+1;
-    d = i / j; 
+    d = -i / j; 
+    return d;
+}
+
+float beta2_generator()  //generise beta1
+{
+	float i = 0;
+    i = rand() %K+(2*K); 
+    return i; 
+}
+
+float beta3_generator()  //generise beta1
+{
+	float i = 0, d = 0, j=0;
+    i = rand() %K; 
+    return -i;
 }
 
 void generate_need()                //generise potrebu izmedju i j
@@ -387,7 +402,7 @@ float F1()                           //1 od 3
 
 float F2()                           //2 od 3
 {
-	float beta=beta1_generator();
+	float beta=beta2_generator();
 	int k=1;
 	float demand=0;
 	for(int i=0; i<n; i++)
@@ -408,7 +423,7 @@ float F2()                           //2 od 3
 
 float F3()                           //3 od 3
 {
-	float beta=beta1_generator();
+	float beta=beta3_generator();
 	int k=1;
 	float demand=0;
 	for(int i=0; i<n; i++)
@@ -547,7 +562,7 @@ string crossover_s(string a, string b,int p)
 	return s;
 }
 
-bool moze(string ga[500][500],int i)				//da li moze da se izvrsi instra cross over na odredjeni set
+bool moze(string ga[700][100],int i)				//da li moze da se izvrsi instra cross over na odredjeni set
 {
 			int *g;
 			for(int j=0; j<brute; j++)      
@@ -583,7 +598,10 @@ void generisi_A(vector<float>& B, float popi[])
     }
 }
 
-
+int filter2(string ga[700][100])
+{
+	return 0;
+}
 
 main()
 {   string rset[500];
@@ -601,7 +619,7 @@ main()
 	filter();
 	int br=convert();   
 	
-	string ga[500][500];
+	string ga[700][100];
 	int t;
     int g;
     int ind;
@@ -624,7 +642,6 @@ main()
    			g=0; t=0;
 		}
 	}
-
 	for(int fo=0; fo<generacion; fo++)       //geneticki
 	{
 		for(int i=0; i<pop; i=i+2)
@@ -633,24 +650,42 @@ main()
 			{
 				if(rand()%2==0)
 				{
-					string pomocni=ga[i][j];
-					ga[i][j]=ga[i+1][j];
-					ga[i+1][j]=pomocni;
+					if(i+1!=pop)
+					{
+						string pomocni=ga[i][j];
+						ga[i][j]=ga[i+1][j];
+						ga[i+1][j]=pomocni;
+					}
+					else
+					{
+						string pomocni=ga[i][j];
+						ga[i][j]=ga[i-1][j];
+						ga[i-1][j]=pomocni;
+					}
 				}
 			}
 		}
 		
-		for(int moe=2; moe<=m; moe++)					//prosiruje matricu ga na N*m
+		for(int moe=1; moe<=m; moe++)					//prosiruje matricu ga na N*m
 		{
 			for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
 			{
 				for(int j=0; j<brute; j++)
 				{
-					ga[i*moe][j]=ga[i][j];
+					ga[pop*moe+i][j]=ga[i][j];
 				}
 			}
 		}
-		
+		for(int i=0; i<pop*m; i++)
+		{
+			for(int j=0; j<brute; j++)
+			{
+				cout<<ga[i][j]<<"| ";
+			}
+			cout<<endl;
+		}
+		cout<<endl;
+		return 0;
 		for(int i=0; i<brute; i++)
 		{
 			mesta[i]=i;
@@ -700,20 +735,31 @@ main()
 			}
 			generate_IVT(rset);
 			popularity[i]=F()/100;
+			cout<<popularity[i]<<" ";
 		}
-		
+		cout<<endl;
 		generisi_B(B);
 		generisi_A(A,popularity);
 		sort(B.begin(), B.end(), Comp(A));
 		
-		cout<<endl;
-		for(int i=0; i<pop; i++)
+		for(int i=0; i<pop*m; i++)
+		{
+			for(int j=0; j<brute; j++)
+			{
+				cout<<ga[i][j]<<" ";
+			}
+			cout<<endl;
+		}
+		
+		/*for(int i=0; i<pop; i++)
 		{
 			for(int j=0; j<brute; j++)
 			{
 				ga[i][j]=ga[(int)B[pop*m-i]][j];
+				cout<<ga[i][j]<<" ";
 			}
-		}
+			cout<<endl;
+		}*/
 	}	
 	
 	for(int i=0; i<brute; i++)
