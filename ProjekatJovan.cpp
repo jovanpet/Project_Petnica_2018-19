@@ -29,21 +29,8 @@ float af2=1;                 //konstanta za F2
 int transfer[100][100];      //matrica transfera
 int U=7;                     //penalty
 int pop=5;         	    //populacija koju koriatim
-int generacion=500;		//broj generacija
+int generacion=3;		//broj generacija
 int m=3;				//povecanje N
-
-/*struct MyComparator
-{
-    const vector<float> & value_vector;
-
-    MyComparator(const vector<float> & val_vec):
-        value_vector(val_vec) {}
-
-    bool operator()(float i1, float i2)
-    {
-        return value_vector[i1] < value_vector[i2];
-    }
-};*/
 
 string coverter_int_array_to_string(int niz[], int broj,int src)
 {
@@ -607,9 +594,22 @@ bool iste_rute(float i, float j,string ga[700][100])
 	}
 }
 
+bool vec_se_nalazi(vector<float> B, int g, string ga[700][100], int i)
+{
+	for(int j=0; j<g; j++)
+	{
+		if(iste_rute(B[j],i,ga))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 void filter2(string ga[700][100], vector<float> glow,vector<float>& B,vector<float>& C)
 {
 	int g=0;
+	vector<float> D(500);
 	for(int i=0; i<pop*m; i++)
 	{
 		C[i]=B[i];
@@ -617,13 +617,15 @@ void filter2(string ga[700][100], vector<float> glow,vector<float>& B,vector<flo
 	for(int i=0; i<brute; i++)
 	{
 		B[0]=glow[pop*m-1];
+		D[0]=glow[pop*m-1];
 	}
 	g++;
 	for(int i=pop*m-2; i>=0; i--)
 	{
-		if(!iste_rute(glow[i],glow[i+1],ga))
+		if(vec_se_nalazi(D,g,ga,i)==false)
 		{
 			B[g]=glow[i];
+			D[g]=glow[i];
 			g++;
 		}
 		if(g==pop)
@@ -655,7 +657,6 @@ main()
     int g;
     int ind;
 	int mesta[br];
-	string naj[10000];
 	float satis;
 	
 	for(int i=0; i<br; i++)
@@ -698,7 +699,6 @@ main()
 				}
 			}
 		}
-
 		for(int moe=1; moe<=m; moe++)					//prosiruje matricu ga na N*m
 		{
 			for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
@@ -750,7 +750,6 @@ main()
 						ga[i][mesta[brute-2]]=crossover_s(ga[i][mesta[brute-2]],koj,ran);
 			}
 		}
-	
 		for(int i=0; i<pop*m; i++)
 		{
 			for(int j=0; j<brute; j++)      		//inter-string crossover sa koef 0.5
@@ -760,9 +759,10 @@ main()
 			generate_IVT(rset);
 			popularity[i]=F()/100;
 		}
+		
 		generisi_B(B);
 		generisi_A(A,popularity);
-		//sort(B.begin(), B.end(), MyComparator(A));
+
    		for (int i = 0; i < pop*m-1; i++)      
 		{	     
        		for (int j = 0; j < pop*m-i-1; j++) 
@@ -779,16 +779,29 @@ main()
 				}
      		}       
 		}	
-	
-		cout<<endl;
 
-		filter2(ga,B,A,C);	
-	/*	for(int i=0; i<pop*m; i++)
+		for(int i=0; i<pop*m; i++)
 		{
 			cout<<B[i]<<" ";
 		}
-		cout<<endl;*/
-	
+		cout<<endl;
+		filter2(ga,B,A,C);	
+		for(int i=0; i<pop; i++)
+		{
+			cout<<A[i]<<" ";
+		}
+		cout<<endl;
+
+		for(int i=0; i<pop*m; i++)
+		{
+			for(int j=0; j<brute; j++)
+			{
+				cout<<ga[i][j]<<" ";
+			}
+			cout<<endl;
+		}
+		cout<<endl;
+		cout<<"j";
 		for(int i=0; i<pop; i++)
 		{
 			for(int j=0; j<brute; j++)
@@ -796,12 +809,21 @@ main()
 				ga[i][j]=ga[(int)A[i]][j];
 			}
 		}
+		for(int i=0; i<pop; i++)
+		{
+			for(int j=0; j<brute; j++)
+			{
+				cout<<ga[i][j]<<" ";
+			}
+			cout<<endl;
+		}
+		cout<<endl;
 
 	}		
 	
 	for(int i=0; i<brute; i++)
 	{
-		cout<<ga[0][i]<<" ";
+		cout<<ga[0][i]<<"| ";
 	}
 //neka glupost
 }
