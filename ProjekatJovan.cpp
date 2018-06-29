@@ -32,11 +32,11 @@ int pop=5;         	    //populacija koju koriatim
 int generacion=5;		//broj generacija
 int m=3;				//povecanje N
 
-struct Comp
+struct MyComparator
 {
     const vector<float> & value_vector;
 
-    Comp(const vector<float> & val_vec):
+    MyComparator(const vector<float> & val_vec):
         value_vector(val_vec) {}
 
     bool operator()(float i1, float i2)
@@ -581,7 +581,7 @@ bool moze(string ga[700][100],int i)				//da li moze da se izvrsi instra cross o
 
 void generisi_B(vector<float>& B)
 {
-	for (int i = 0; i < pop*m; ++i)
+	for (int i = 0; i < pop*m; i++)
     {
         B[i] = i;
     }
@@ -755,8 +755,8 @@ main()
 		}
 		generisi_B(B);
 		generisi_A(A,popularity);
-		sort(B.begin(), B.end(), Comp(A));
-	for(int i=0; i<pop; i++)
+		sort(B.begin(), B.end(), MyComparator(A));
+		for(int i=0; i<pop*m; i++)
 		{
 			cout<<B[i]<<" ";
 		}
