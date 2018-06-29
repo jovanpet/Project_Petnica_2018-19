@@ -29,10 +29,10 @@ float af2=1;                 //konstanta za F2
 int transfer[100][100];      //matrica transfera
 int U=7;                     //penalty
 int pop=5;         	    //populacija koju koriatim
-int generacion=5;		//broj generacija
+int generacion=500;		//broj generacija
 int m=3;				//povecanje N
 
-struct MyComparator
+/*struct MyComparator
 {
     const vector<float> & value_vector;
 
@@ -43,7 +43,7 @@ struct MyComparator
     {
         return value_vector[i1] < value_vector[i2];
     }
-};
+};*/
 
 string coverter_int_array_to_string(int niz[], int broj,int src)
 {
@@ -607,9 +607,13 @@ bool iste_rute(float i, float j,string ga[700][100])
 	}
 }
 
-void filter2(string ga[700][100], vector<float> glow,vector<float>& B)
+void filter2(string ga[700][100], vector<float> glow,vector<float>& B,vector<float>& C)
 {
 	int g=0;
+	for(int i=0; i<pop*m; i++)
+	{
+		C[i]=B[i];
+	}
 	for(int i=0; i<brute; i++)
 	{
 		B[0]=glow[pop*m-1];
@@ -632,6 +636,7 @@ void filter2(string ga[700][100], vector<float> glow,vector<float>& B)
 main()
 {   string rset[500];
 	vector<float> A(500), B(500); 
+	vector<float> C(500);
 	float popularity[10000];
 	srand(time(0));
 	scanf("%d",&n);
@@ -650,6 +655,8 @@ main()
     int g;
     int ind;
 	int mesta[br];
+	string naj[10000];
+	float satis;
 	
 	for(int i=0; i<br; i++)
 	{
@@ -755,20 +762,33 @@ main()
 		}
 		generisi_B(B);
 		generisi_A(A,popularity);
-		sort(B.begin(), B.end(), MyComparator(A));
-		for(int i=0; i<pop*m; i++)
+		//sort(B.begin(), B.end(), MyComparator(A));
+   		for (int i = 0; i < pop*m-1; i++)      
+		{	     
+       		for (int j = 0; j < pop*m-i-1; j++) 
+       		{
+           		if (A[j] > A[j+1])
+           		{
+           			int pom;
+           			pom=A[j];
+           			A[j]=A[j+1];
+           			A[j+1]=pom;
+           			pom=B[j];
+           			B[j]=B[j+1];
+           			B[j+1]=pom;
+				}
+     		}       
+		}	
+	
+		cout<<endl;
+
+		filter2(ga,B,A,C);	
+	/*	for(int i=0; i<pop*m; i++)
 		{
 			cout<<B[i]<<" ";
 		}
-		
-		cout<<endl;
-		filter2(ga,B,A);
-		
-		for(int i=0; i<pop; i++)
-		{
-			cout<<A[i]<<" ";
-		}
-		cout<<endl;
+		cout<<endl;*/
+	
 		for(int i=0; i<pop; i++)
 		{
 			for(int j=0; j<brute; j++)
@@ -777,7 +797,8 @@ main()
 			}
 		}
 
-	}	
+	}		
+	
 	for(int i=0; i<brute; i++)
 	{
 		cout<<ga[0][i]<<" ";
