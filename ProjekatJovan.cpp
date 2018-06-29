@@ -11,6 +11,7 @@
 #include <climits>
 #include <iterator> 
 #include <vector>
+#include <iterator>
 
 using namespace std;
 
@@ -22,14 +23,27 @@ string rute[100][100];   //sve rute izmedju dve (t znaci da ne postoji ruta izme
 string rfilter[10000];   //niz  
 int ruta[100];           //ness pomocno
 int n;  int duzina;      //n-broj noda duzina-ness pomocno
-float K; float xm;       //K,xm-const          menjam po slucaju!!!
-int brute=5;               //broj ruta u grafu   menjam po slucaju!!!
+int K=10; int xm=35;       //K,xm-const          menjam po slucaju!!!
+int brute=4;               //broj ruta u grafu   menjam po slucaju!!!
 float af2=1;             //konstanta za F2
 int transfer[100][100];  //matrica transfera
 int U=7;                   //penalty
-int pop=20;         	//populacija koju koriatim
-int generacion=1;		//broj generacija
-int m=5;				//povecanje N
+int pop=5;         	//populacija koju koriatim
+int generacion=20;		//broj generacija
+int m=3;				//povecanje N
+
+struct Comp
+{
+    const vector<float> & value_vector;
+
+    Comp(const vector<float> & val_vec):
+        value_vector(val_vec) {}
+
+    bool operator()(float i1, float i2)
+    {
+        return value_vector[i1] < value_vector[i2];
+    }
+};
 
 string coverter_int_array_to_string(int niz[], int broj,int src)
 {
@@ -163,8 +177,10 @@ void generate_time()  //generise vreme izmedju i j
 
 float beta1_generator()  //generise beta1
 {
-	 float r2 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/-(K/xm))); 
-	 return r2;
+	float i = 0, d = 0, j=0;
+    i = rand() %(K+1); 
+    j=rand()% xm+1;
+    d = i / j; 
 }
 
 void generate_need()                //generise potrebu izmedju i j
@@ -356,13 +372,17 @@ float F1()                           //1 od 3
 		{
 			if(IVT[i][j]>=0 && IVT[i][j]<=xm)
 			{
-				u1+=((float)need[i][j])*fij(i,j,beta);
-				u2+=(float)need[i][j];
+				u1+=(need[i][j])*fij(i,j,beta);
+				u2+=need[i][j];
 			}
 		}
 		k++;
 	}
-	return u1/u2;
+	if(u2!=0)
+	{
+		return u1/u2;
+	}
+	else return 0;
 }
 
 float F2()                           //2 od 3
@@ -547,8 +567,27 @@ bool moze(string ga[500][500],int i)				//da li moze da se izvrsi instra cross o
 			return false;
 }
 
+void generisi_B(vector<float>& B)
+{
+	for (int i = 0; i < pop*m; ++i)
+    {
+        B[i] = i;
+    }
+}
+
+void generisi_A(vector<float>& B, float popi[])
+{
+	for (int i = 0; i < pop*m; ++i)
+    {
+        B[i] = popi[i];
+    }
+}
+
+
+
 main()
 {   string rset[500];
+	vector<float> A(500), B(500); 
 	float popularity[10000];
 	srand(time(0));
 	scanf("%d",&n);
@@ -658,16 +697,30 @@ main()
 			for(int j=0; j<brute; j++)      		//inter-string crossover sa koef 0.5
 			{
 				rset[j]=ga[i][j];
-				cout<<rset[j]<<"| ";
 			}
-			cout<<endl;
 			generate_IVT(rset);
-			
-			popularity[i]=F();
-			cout<<popularity[i];
+			popularity[i]=F()/100;
+		}
+		
+		generisi_B(B);
+		generisi_A(A,popularity);
+		sort(B.begin(), B.end(), Comp(A));
+		
+		cout<<endl;
+		for(int i=0; i<pop; i++)
+		{
+			for(int j=0; j<brute; j++)
+			{
+				ga[i][j]=ga[(int)B[pop*m-i]][j];
+			}
 		}
 	}	
-	//do ovde je za IRSA
+	
+	for(int i=0; i<brute; i++)
+	{
+		cout<<ga[0][i]<<" ";
+	}
+
 }
 
 
