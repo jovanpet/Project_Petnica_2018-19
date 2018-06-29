@@ -15,21 +15,21 @@
 
 using namespace std;
 
-int Tij[100][100];       //najbrzi put izmedju i->j
-float IVT[100][100];     //x
-int time1[100][100];     //vreme izmedju svake dir povezane rute
-int need[100][100];      //need izmedju i j
-string rute[100][100];   //sve rute izmedju dve (t znaci da ne postoji ruta izmedju njih !!!)
-string rfilter[10000];   //niz  
-int ruta[100];           //ness pomocno
-int n;  int duzina;      //n-broj noda duzina-ness pomocno
-int K=10; int xm=35;       //K,xm-const          menjam po slucaju!!!
-int brute=4;               //broj ruta u grafu   menjam po slucaju!!!
-float af2=1;             //konstanta za F2
-int transfer[100][100];  //matrica transfera
-int U=7;                   //penalty
-int pop=5;         	//populacija koju koriatim
-int generacion=1;		//broj generacija
+int Tij[100][100];           //najbrzi put izmedju i->j
+float IVT[100][100];         //x
+int time1[100][100];         //vreme izmedju svake dir povezane rute
+int need[100][100];          //need izmedju i j
+string rute[100][100];       //sve rute izmedju dve (t znaci da ne postoji ruta izmedju njih !!!)
+string rfilter[10000];       //niz  
+int ruta[100];               //ness pomocno
+int n;  int duzina;          //n-broj noda duzina-ness pomocno
+int K=10; int xm=35;         //K,xm-const          menjam po slucaju!!!
+int brute=4;                 //broj ruta u grafu   menjam po slucaju!!!
+float af2=1;                 //konstanta za F2
+int transfer[100][100];      //matrica transfera
+int U=7;                     //penalty
+int pop=5;         	    //populacija koju koriatim
+int generacion=5;		//broj generacija
 int m=3;				//povecanje N
 
 struct Comp
@@ -447,9 +447,6 @@ float F()
 	return F1()+F2()+F3();
 }
 
-bool sorti (int i,int j) 
-{ return (i>j); }
-
 void filter()   //filter od matrice skidamo preklapanje :)
 {
 	int k=1;
@@ -598,9 +595,38 @@ void generisi_A(vector<float>& B, float popi[])
     }
 }
 
-int filter2(string ga[700][100])
+bool iste_rute(float i, float j,string ga[700][100])
 {
-	return 0;
+	for(int l=0; l<brute; l++)
+	{
+		if(ga[(int)i][l]!=ga[(int)j][l])
+		{
+			return false;
+		}
+		return true;
+	}
+}
+
+void filter2(string ga[700][100], vector<float> glow,vector<float>& B)
+{
+	int g=0;
+	for(int i=0; i<brute; i++)
+	{
+		B[0]=glow[pop*m-1];
+	}
+	g++;
+	for(int i=pop*m-2; i>=0; i--)
+	{
+		if(!iste_rute(glow[i],glow[i+1],ga))
+		{
+			B[g]=glow[i];
+			g++;
+		}
+		if(g==pop)
+		{
+			break;
+		}
+	}
 }
 
 main()
@@ -665,7 +691,7 @@ main()
 				}
 			}
 		}
-		
+
 		for(int moe=1; moe<=m; moe++)					//prosiruje matricu ga na N*m
 		{
 			for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
@@ -676,11 +702,12 @@ main()
 				}
 			}
 		}
+		
 		for(int i=0; i<brute; i++)
 		{
 			mesta[i]=i;
 		}
-		
+
 		for(int i=0; i<pop*m; i++)					//inter-string crossover sa koef 0.5
 		{	
 			if(moze(ga,i))
@@ -716,7 +743,7 @@ main()
 						ga[i][mesta[brute-2]]=crossover_s(ga[i][mesta[brute-2]],koj,ran);
 			}
 		}
-		
+	
 		for(int i=0; i<pop*m; i++)
 		{
 			for(int j=0; j<brute; j++)      		//inter-string crossover sa koef 0.5
@@ -726,29 +753,30 @@ main()
 			generate_IVT(rset);
 			popularity[i]=F()/100;
 		}
-		cout<<endl;
 		generisi_B(B);
 		generisi_A(A,popularity);
 		sort(B.begin(), B.end(), Comp(A));
-		
-		for(int i=0; i<pop*m; i++)
+	for(int i=0; i<pop; i++)
 		{
-			for(int j=0; j<brute; j++)
-			{
-				cout<<ga[i][j]<<" ";
-			}
-			cout<<endl;
+			cout<<B[i]<<" ";
 		}
 		
-		/*for(int i=0; i<pop; i++)
+		cout<<endl;
+		filter2(ga,B,A);
+		
+		for(int i=0; i<pop; i++)
+		{
+			cout<<A[i]<<" ";
+		}
+		cout<<endl;
+		for(int i=0; i<pop; i++)
 		{
 			for(int j=0; j<brute; j++)
 			{
-				ga[i][j]=ga[(int)B[pop*m-i]][j];
-				cout<<ga[i][j]<<" ";
+				ga[i][j]=ga[(int)A[i]][j];
 			}
-			cout<<endl;
-		}*/
+		}
+
 	}	
 	for(int i=0; i<brute; i++)
 	{
