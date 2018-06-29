@@ -466,75 +466,64 @@ int convert()   //prebacuje maricu ruta u niz bez "t"
 	return y;
 }
 
-string* podeli(string a)
+void podeli(vector<string>& seglist,string a)
 {
 	std::stringstream test1(a);
 	std::string segment;
-	std::vector<std::string> seglist;
 	while(std::getline(test1, segment, ' '))
 	{
    		seglist.push_back(segment);
 	}
 }
 
+int lociraj(vector<string> seglist,string p)
+{
+	for(int i=0; i<seglist.size(); i++)
+	{
+		if(seglist[i]==p)
+		{
+			return i;
+		}
+	}
+}
 
 string crossover_s(string a, string b,int p)
 {
-	std::stringstream test1(a);
-	std::string segment;
 	std::vector<std::string> seglist;
-	while(std::getline(test1, segment, ' '))
-	{
-   		seglist.push_back(segment);
-	}
-	std::stringstream test2(b);
 	std::vector<std::string> seglist1;
-	while(std::getline(test2, segment, ' '))
-	{
-   		seglist1.push_back(segment);
-	}
-	string s; int c; int d; string inti;
-	inti =covert_int_to_string(p);
+	podeli(seglist,a);
+	podeli(seglist1,b);
+	string s="";
+	int c; int d; 
+	string inti;
+	inti=covert_int_to_string(p);
+	c=lociraj(seglist,inti);
+	d=lociraj(seglist1,inti);
 	
-	for(int i=0; i<seglist.size(); i++)
-	{
-		if(seglist[i]==inti)
-		{
-			c=i;
-			break;
-		}	
-	}
-	for(int i=0; i<seglist1.size(); i++)
-	{
-		if(seglist1[i]==inti)
-		{
-			d=i;
-			break;
-		}	
-	}
 	for(int i=0; i<c; i++)
 	{
-		if(c==d && i==seglist.size())
-		{
-			s+=seglist[i];
-		}
-		else
-		{
 		s+=seglist[i]+" ";
-		}
 	}
-	for(int i=d; i<seglist1.size(); i++)
+	if(d+1==seglist1.size())
 	{
-		if(i==seglist.size())
+		s+=inti;
+	}
+	else
+	{
+		s+=inti+" ";
+		for(int i=d+1; i<seglist1.size(); i++)
 		{
-			s+=seglist[i];
-		}
-		else
-		{
-		s+=seglist[i]+" ";
+
+			if(i+1!=seglist1.size())
+			{
+				s+=seglist1[i]+" ";
+			}
+			else 
+			{
+				s+=seglist1[i];
+			}
 		}
 	}
-	
 	return s;
 }
 
@@ -611,7 +600,7 @@ main()
 				}
 			}
 		}
-		cout<<"J";
+		
 		for(int moe=2; moe<=m; moe++)					//prosiruje matricu ga na N*m
 		{
 			for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
@@ -622,7 +611,7 @@ main()
 				}
 			}
 		}
-		cout<<"o";
+		
 		for(int i=0; i<brute; i++)
 		{
 			mesta[i]=i;
@@ -641,7 +630,7 @@ main()
    					}
    					int *lol;
    					lol=preklapanje(ga[i][mesta[brute-1]],ga[i][mesta[brute-2]]);
-   					while(*lol==-1)
+   					while(*lol==-1 )
    					{
    						for(int plo=0; plo<2; plo++)
   						{
@@ -658,26 +647,26 @@ main()
 						ran=*(lol+ran);
 						string koj;
 						koj=ga[i][mesta[brute-1]];
-						cout<<koj<<"| "<<ga[i][mesta[brute-2]]<<" "<<ran<<endl;
+						//cout<<koj<<"| "<<ga[i][mesta[brute-2]]<<" "<<ran<<endl;
 						ga[i][mesta[brute-1]]=crossover_s(koj,ga[i][mesta[brute-2]],ran);
 						ga[i][mesta[brute-2]]=crossover_s(ga[i][mesta[brute-2]],koj,ran);
-   						cout<<koj<<"| "<<ga[i][mesta[brute-2]]<<endl;
-   				
 			}
 		}
-		cout<<"v";
+		
 		for(int i=0; i<pop*m; i++)
 		{
 			for(int j=0; j<brute; j++)      		//inter-string crossover sa koef 0.5
 			{
 				rset[j]=ga[i][j];
+				cout<<rset[j]<<"| ";
 			}
+			cout<<endl;
 			generate_IVT(rset);
 			
 			popularity[i]=F();
+			cout<<popularity[i];
 		}
-	}
-	
+	}	
 	//do ovde je za IRSA
 }
 
