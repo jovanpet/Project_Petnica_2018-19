@@ -676,16 +676,6 @@ main()
 				}
 			}
 		}
-		for(int i=0; i<pop*m; i++)
-		{
-			for(int j=0; j<brute; j++)
-			{
-				cout<<ga[i][j]<<"| ";
-			}
-			cout<<endl;
-		}
-		cout<<endl;
-		return 0;
 		for(int i=0; i<brute; i++)
 		{
 			mesta[i]=i;
@@ -735,7 +725,6 @@ main()
 			}
 			generate_IVT(rset);
 			popularity[i]=F()/100;
-			cout<<popularity[i]<<" ";
 		}
 		cout<<endl;
 		generisi_B(B);
@@ -761,12 +750,11 @@ main()
 			cout<<endl;
 		}*/
 	}	
-	
 	for(int i=0; i<brute; i++)
 	{
 		cout<<ga[0][i]<<" ";
 	}
-
+//neka glupost
 }
 
 
