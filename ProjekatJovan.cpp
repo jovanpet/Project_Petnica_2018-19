@@ -620,6 +620,7 @@ bool vec_se_nalazi(vector<float> B, int g, string ga[700][100], int i)
 				return true;
 			}
 	}
+	
 	return false;
 }
 
@@ -636,7 +637,7 @@ void filter2(string ga[700][100], vector<float> glow,vector<float>& B,vector<flo
 	g++;
 	for(int i=pop*m-2; i>=0; i--)
 	{
-		if(vec_se_nalazi(D,g,ga,i)==false)
+		if(vec_se_nalazi(D,g,ga,glow[i])==false)
 		{
 			B[g]=glow[i];
 			D[g]=glow[i];
@@ -785,7 +786,7 @@ main()
 			popularity[i]=F()/100;
 		}
 		
-		for(int i=0; i<pop*m; i++)
+	/*	for(int i=0; i<pop*m; i++)
 		{
 			for(int j=0; j<brute; j++)      		
 			{
@@ -793,7 +794,7 @@ main()
 			}
 			cout<<popularity[i]<<endl;
 		}
-		cout<<endl;
+		cout<<endl;*/
 
 		generisi_B(B);
 		generisi_A(A,popularity);
@@ -815,19 +816,9 @@ main()
      		}       
 		}	
 
-	for(int i=0; i<pop*m; i++)
-		{
-			cout<<B[i]<<" ";
-		}
 		cout<<endl;
 		filter2(ga,B,A,C);	
-		
-		for(int i=0; i<pop; i++)
-		{
-			cout<<A[i]<<" ";
-		}
-		cout<<endl;
-		
+	
 		for(int i=0; i<pop; i++)
 		{
 			for(int j=0; j<brute; j++)
@@ -836,17 +827,17 @@ main()
 			}
 		}
 		
-			for(int i=0; i<pop; i++)
+		for(int i=0; i<pop; i++)	
 		{
 			for(int j=0; j<brute; j++)
 			{
-				ga[i][j]=gapom[i][j];
+				ga[i][j]=gapom[i][j];	
 			}
 		}
 		
 		for(int i=0; i<pop; i++)
 		{
-			for(int j=0; j<brute; j++)      		//inter-string crossover sa koef 0.5
+			for(int j=0; j<brute; j++)      		
 			{
 				cout<<ga[i][j]<<"| ";
 			}
