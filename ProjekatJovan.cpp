@@ -26,24 +26,10 @@ int n;  int duzina;          //n-broj noda duzina-ness pomocno
 int K=10; int xm=35;         //K,xm-const          menjam po slucaju!!!
 int brute=4;                 //broj ruta u grafu   menjam po slucaju!!!
 float af2=1;                 //konstanta za F2
-int transfer[100][100];      //matrica transfera
-int U=7;                     //penalty
-int pop=5;         	    //populacija koju koriatim
-int generacion=5;		//broj generacija
-int m=3;				//povecanje N
-
-struct Comp
-{
-    const vector<float> & value_vector;
-
-    Comp(const vector<float> & val_vec):
-        value_vector(val_vec) {}
-
-    bool operator()(float i1, float i2)
-    {
-        return value_vector[i1] < value_vector[i2];
-    }
-};
+int U=5;                     //penalty
+int pop=20;         	    //populacija koju koriatim
+int generacion=500;		//broj generacija
+int m=5;				//povecanje N
 
 string coverter_int_array_to_string(int niz[], int broj,int src)
 {
@@ -204,7 +190,7 @@ void generate_need()                //generise potrebu izmedju i j
 	{
 		for(int j=0; j<n; j++)
 		{
-			need[i][j]=rand() % 20+1;
+			need[i][j]=rand() % 10+1;
 		}
 	}
 }
@@ -370,6 +356,7 @@ void generate_IVT(string rset[])  //generisanje x za F1
 
 float fij(int i, int j,float beta) //racuna fij za F1 (pogledaj skriptu)
 {
+	beta=1;
 	float k=beta/xm;
 	float l=K/(xm*xm);
 	return -(k+l)*IVT[i][j]*IVT[i][j]+ beta*IVT[i][j]+K;
@@ -378,6 +365,7 @@ float fij(int i, int j,float beta) //racuna fij za F1 (pogledaj skriptu)
 float F1()                           //1 od 3
 {
 	float beta=beta1_generator();
+	beta=1;
 	float u1=0;
 	float u2=0;
 	int k=1;
@@ -403,6 +391,7 @@ float F1()                           //1 od 3
 float F2()                           //2 od 3
 {
 	float beta=beta2_generator();
+	beta=1;
 	int k=1;
 	float demand=0;
 	for(int i=0; i<n; i++)
@@ -424,6 +413,7 @@ float F2()                           //2 od 3
 float F3()                           //3 od 3
 {
 	float beta=beta3_generator();
+	beta=1;
 	int k=1;
 	float demand=0;
 	for(int i=0; i<n; i++)
@@ -444,7 +434,7 @@ float F3()                           //3 od 3
 
 float F()
 {
-	return F1()+F2()+F3();
+	return 20*F1()+5*F2()+F3();
 }
 
 void filter()   //filter od matrice skidamo preklapanje :)
@@ -531,32 +521,35 @@ string crossover_s(string a, string b,int p)
 	inti=covert_int_to_string(p);
 	c=lociraj(seglist,inti);
 	d=lociraj(seglist1,inti);
-	
-	for(int i=0; i<c; i++)
+	if(c!=0 && d+1!=seglist1.size())
 	{
-		s+=seglist[i]+" ";
-	}
-	if(d+1==seglist1.size())
-	{
-		s+=inti;
-	}
-	else
-	{
-		s+=inti+" ";
-		for(int i=d+1; i<seglist1.size(); i++)
+		for(int i=0; i<c; i++)
 		{
+			s+=seglist[i]+" ";
+		}
+		if(d+1==seglist1.size())
+		{
+			s+=inti;
+		}
+		else
+		{
+			s+=inti+" ";
+			for(int i=d+1; i<seglist1.size(); i++)
+			{
 
-			if(i+1!=seglist1.size())
-			{
-				s+=seglist1[i]+" ";
-			}
-			else 
-			{
-				s+=seglist1[i];
+				if(i+1!=seglist1.size())
+				{
+					s+=seglist1[i]+" ";
+				}
+				else 
+				{
+					s+=seglist1[i];
+				}
 			}
 		}
-	}
 	return s;
+	}
+	return a;
 }
 
 bool moze(string ga[700][100],int i)				//da li moze da se izvrsi instra cross over na odredjeni set
@@ -581,7 +574,7 @@ bool moze(string ga[700][100],int i)				//da li moze da se izvrsi instra cross o
 
 void generisi_B(vector<float>& B)
 {
-	for (int i = 0; i < pop*m; ++i)
+	for (int i = 0; i < pop*m; i++)
     {
         B[i] = i;
     }
@@ -595,43 +588,96 @@ void generisi_A(vector<float>& B, float popi[])
     }
 }
 
-bool iste_rute(float i, float j,string ga[700][100])
+bool iste_rute(float i, int j,string ga[700][100])			//gldea da li su iste rute neke dve iz ganeticke matrice
 {
-	for(int l=0; l<brute; l++)
+	int joca=0; 
+	
+	for(int ho=0; ho<brute; ho++)
 	{
-		if(ga[(int)i][l]!=ga[(int)j][l])
+		for(int l=0; l<brute; l++)
 		{
-			return false;
+			if(ga[(int)i][ho]==ga[j][l])
+			{
+				joca++;
+				l=brute;
+			}
+			
 		}
-		return true;
 	}
+	if(joca==brute)
+	{
+		return true;
+	}	
+	return false;
 }
 
-void filter2(string ga[700][100], vector<float> glow,vector<float>& B)
+bool vec_se_nalazi(vector<float> B, int g, string ga[700][100], int i)
+{
+	for(int j=0; j<g; j++)
+	{
+			if(iste_rute(B[j],i,ga) || B[j]==i)
+			{
+				return true;
+			}
+	}
+	
+	return false;
+}
+
+void filter2(string ga[700][100], vector<float> glow,vector<float>& B,vector<float>& C)
 {
 	int g=0;
-	for(int i=0; i<brute; i++)
+	vector<float> D(500);
+	for(int i=0; i<pop*m; i++)
 	{
-		B[0]=glow[pop*m-1];
+		C[i]=B[i];
 	}
+	B[0]=glow[pop*m-1];
+	D[0]=glow[pop*m-1];
 	g++;
 	for(int i=pop*m-2; i>=0; i--)
 	{
-		if(!iste_rute(glow[i],glow[i+1],ga))
+		if(vec_se_nalazi(D,g,ga,glow[i])==false)
 		{
 			B[g]=glow[i];
+			D[g]=glow[i];
 			g++;
 		}
-		if(g==pop)
+	}
+	if(B[pop]<0)
+	{
+		cout<<"JOJ";
+		for(int i=0; i<pop; i++)
 		{
-			break;
+			if(B[i]<0)
+			{
+				B[i]=rand()% pop*m;
+			}
 		}
 	}
+}
+
+bool ima_ponavljanja(string a)
+{
+	std::vector<std::string> seglist;
+	podeli(seglist,a);
+	for(int i=0; i<seglist.size(); i++)
+	{
+		for(int j=0; j<seglist.size(); j++)
+		{
+			if(i!=j && seglist[i]==seglist[j])
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 main()
 {   string rset[500];
 	vector<float> A(500), B(500); 
+	vector<float> C(500);
 	float popularity[10000];
 	srand(time(0));
 	scanf("%d",&n);
@@ -646,16 +692,18 @@ main()
 	int br=convert();   
 	
 	string ga[700][100];
+	string gapom[pop][brute];
 	int t;
     int g;
     int ind;
 	int mesta[br];
+	float satis;
 	
 	for(int i=0; i<br; i++)
 	{
 		mesta[i]=i;
 	}
-
+	
 	for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
 	{
 		for(int j=0; j<brute; j++)
@@ -668,8 +716,10 @@ main()
    			g=0; t=0;
 		}
 	}
+	
 	for(int fo=0; fo<generacion; fo++)       //geneticki
 	{
+		//cout<<fo<<" ";
 		for(int i=0; i<pop; i=i+2)
 		{
 			for(int j=0; j<brute; j++)      //inter-string crossover sa koef 0.5
@@ -691,23 +741,34 @@ main()
 				}
 			}
 		}
-
-		for(int moe=1; moe<=m; moe++)					//prosiruje matricu ga na N*m
-		{
-			for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
-			{
-				for(int j=0; j<brute; j++)
-				{
-					ga[pop*moe+i][j]=ga[i][j];
-				}
-			}
-		}
-		
-		for(int i=0; i<brute; i++)
+	
+		for(int i=0; i<br; i++)					//refresh za mesta
 		{
 			mesta[i]=i;
 		}
-
+	
+		for(int moe=1; moe<m; moe++)				//uvecaj matricu
+		{				
+			for(int i=0; i<pop; i++)                 
+			{
+				for(int j=0; j<brute; j++)
+				{
+   					t=rand()%(br-j);
+   					g=mesta[t];
+   					mesta[t]=mesta[br-1-j];
+   					mesta[br-1-j]=g;
+   					ga[pop*moe+i][j]=rfilter[g];
+   					g=0; t=0;
+   					//ga[pop*moe+i][j]=ga[i][j];
+				}			
+			}
+		}
+		
+		for(int i=0; i<brute; i++)				//refesh za mesta
+		{
+			mesta[i]=i;
+		}
+		
 		for(int i=0; i<pop*m; i++)					//inter-string crossover sa koef 0.5
 		{	
 			if(moze(ga,i))
@@ -743,7 +804,28 @@ main()
 						ga[i][mesta[brute-2]]=crossover_s(ga[i][mesta[brute-2]],koj,ran);
 			}
 		}
-	
+		
+		for(int i=0; i<br; i++)					//refresh za mesta
+		{
+			mesta[i]=i;
+		}
+		
+		for(int i=0; i<pop*m; i++)				//unistavanje ponavljanja
+		{
+			for(int j=0; j<brute; j++)
+			{
+				if(ima_ponavljanja(ga[i][j]))
+				{
+					t=rand()%(br-j);
+   					g=mesta[t];
+   					mesta[t]=mesta[br-1-j];
+   					mesta[br-1-j]=g;
+   					ga[i][j]=rfilter[g];
+   					g=0; t=0;
+				}
+			}
+		}
+
 		for(int i=0; i<pop*m; i++)
 		{
 			for(int j=0; j<brute; j++)      		//inter-string crossover sa koef 0.5
@@ -753,36 +835,76 @@ main()
 			generate_IVT(rset);
 			popularity[i]=F()/100;
 		}
+		
+	/*	for(int i=0; i<pop*m; i++)
+		{
+			for(int j=0; j<brute; j++)      		
+			{
+				cout<<ga[i][j]<<"| ";
+			}
+			cout<<popularity[i]<<endl;
+		}
+		cout<<endl;*/
+
 		generisi_B(B);
 		generisi_A(A,popularity);
-		sort(B.begin(), B.end(), Comp(A));
-	for(int i=0; i<pop; i++)
-		{
-			cout<<B[i]<<" ";
-		}
-		
-		cout<<endl;
-		filter2(ga,B,A);
-		
-		for(int i=0; i<pop; i++)
+
+   		for (int i = 0; i < pop*m-1; i++)      
+		{	     
+       		for (int j = 0; j < pop*m-i-1; j++) 
+       		{
+           		if (A[j] > A[j+1])
+           		{
+           			int pom;
+           			pom=A[j];
+           			A[j]=A[j+1];
+           			A[j+1]=pom;
+           			pom=B[j];
+           			B[j]=B[j+1];
+           			B[j+1]=pom;
+				}
+     		}       
+		}	
+
+	//	cout<<endl;
+		filter2(ga,B,A,C);	
+	
+	/*	for(int i=0; i<pop; i++)
 		{
 			cout<<A[i]<<" ";
 		}
-		cout<<endl;
+		cout<<endl;*/
+	
 		for(int i=0; i<pop; i++)
 		{
 			for(int j=0; j<brute; j++)
 			{
-				ga[i][j]=ga[(int)A[i]][j];
+				gapom[i][j]=ga[(int)A[i]][j];
 			}
 		}
-
-	}	
+		
+		for(int i=0; i<pop; i++)	
+		{
+			for(int j=0; j<brute; j++)
+			{
+				ga[i][j]=gapom[i][j];	
+			}
+		}
+		
+		/*for(int i=0; i<pop; i++)
+		{
+			for(int j=0; j<brute; j++)      		
+			{
+				cout<<ga[i][j]<<"| ";
+			}
+			cout<<popularity[(int)A[i]]<<endl;
+		}
+		cout<<endl;*/
+	}		
 	for(int i=0; i<brute; i++)
 	{
-		cout<<ga[0][i]<<" ";
+		cout<<ga[0][i]<<"| ";
 	}
-//neka glupost
 }
 
 
