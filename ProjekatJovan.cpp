@@ -24,11 +24,11 @@ string rfilter[10000];       //niz
 int ruta[100];               //ness pomocno
 int n;  int duzina;          //n-broj noda duzina-ness pomocno
 int K=10; int xm=35;         //K,xm-const          menjam po slucaju!!!
-int brute=3;                 //broj ruta u grafu   menjam po slucaju!!!
+int brute=4;                 //broj ruta u grafu   menjam po slucaju!!!
 float af2=1;                 //konstanta za F2
 int U=5;                     //penalty
 int pop=20;         	    //populacija koju koriatim
-int generacion=50;		//broj generacija
+int generacion=500;		//broj generacija
 int m=5;				//povecanje N
 
 string coverter_int_array_to_string(int niz[], int broj,int src)
@@ -434,7 +434,7 @@ float F3()                           //3 od 3
 
 float F()
 {
-	return F1()+F2()+F3();
+	return 20*F1()+5*F2()+F3();
 }
 
 void filter()   //filter od matrice skidamo preklapanje :)
@@ -643,12 +643,35 @@ void filter2(string ga[700][100], vector<float> glow,vector<float>& B,vector<flo
 			D[g]=glow[i];
 			g++;
 		}
-		
-		if(g==pop)
+	}
+	if(B[pop]<0)
+	{
+		cout<<"JOJ";
+		for(int i=0; i<pop; i++)
 		{
-			break;
+			if(B[i]<0)
+			{
+				B[i]=rand()% pop*m;
+			}
 		}
 	}
+}
+
+bool ima_ponavljanja(string a)
+{
+	std::vector<std::string> seglist;
+	podeli(seglist,a);
+	for(int i=0; i<seglist.size(); i++)
+	{
+		for(int j=0; j<seglist.size(); j++)
+		{
+			if(i!=j && seglist[i]==seglist[j])
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 main()
@@ -696,7 +719,7 @@ main()
 	
 	for(int fo=0; fo<generacion; fo++)       //geneticki
 	{
-		cout<<fo<<" ";
+		//cout<<fo<<" ";
 		for(int i=0; i<pop; i=i+2)
 		{
 			for(int j=0; j<brute; j++)      //inter-string crossover sa koef 0.5
@@ -719,7 +742,12 @@ main()
 			}
 		}
 	
-		for(int moe=1; moe<m; moe++)	
+		for(int i=0; i<br; i++)					//refresh za mesta
+		{
+			mesta[i]=i;
+		}
+	
+		for(int moe=1; moe<m; moe++)				//uvecaj matricu
 		{				
 			for(int i=0; i<pop; i++)                 
 			{
@@ -731,11 +759,12 @@ main()
    					mesta[br-1-j]=g;
    					ga[pop*moe+i][j]=rfilter[g];
    					g=0; t=0;
-				}
+   					//ga[pop*moe+i][j]=ga[i][j];
+				}			
 			}
 		}
 		
-		for(int i=0; i<brute; i++)
+		for(int i=0; i<brute; i++)				//refesh za mesta
 		{
 			mesta[i]=i;
 		}
@@ -776,6 +805,27 @@ main()
 			}
 		}
 		
+		for(int i=0; i<br; i++)					//refresh za mesta
+		{
+			mesta[i]=i;
+		}
+		
+		for(int i=0; i<pop*m; i++)				//unistavanje ponavljanja
+		{
+			for(int j=0; j<brute; j++)
+			{
+				if(ima_ponavljanja(ga[i][j]))
+				{
+					t=rand()%(br-j);
+   					g=mesta[t];
+   					mesta[t]=mesta[br-1-j];
+   					mesta[br-1-j]=g;
+   					ga[i][j]=rfilter[g];
+   					g=0; t=0;
+				}
+			}
+		}
+
 		for(int i=0; i<pop*m; i++)
 		{
 			for(int j=0; j<brute; j++)      		//inter-string crossover sa koef 0.5
@@ -816,8 +866,14 @@ main()
      		}       
 		}	
 
-		cout<<endl;
+	//	cout<<endl;
 		filter2(ga,B,A,C);	
+	
+	/*	for(int i=0; i<pop; i++)
+		{
+			cout<<A[i]<<" ";
+		}
+		cout<<endl;*/
 	
 		for(int i=0; i<pop; i++)
 		{
@@ -835,7 +891,7 @@ main()
 			}
 		}
 		
-		for(int i=0; i<pop; i++)
+		/*for(int i=0; i<pop; i++)
 		{
 			for(int j=0; j<brute; j++)      		
 			{
@@ -843,7 +899,7 @@ main()
 			}
 			cout<<popularity[(int)A[i]]<<endl;
 		}
-		cout<<endl;
+		cout<<endl;*/
 	}		
 	for(int i=0; i<brute; i++)
 	{
