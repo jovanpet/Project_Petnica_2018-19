@@ -28,7 +28,7 @@ int brute=4;                 //broj ruta u grafu   menjam po slucaju!!!
 float af2=1;                 //konstanta za F2
 int U=5;                     //penalty
 int pop=20;         	    //populacija koju koriatim
-int generacion=500;		//broj generacija
+int generacion=1000;		//broj generacija
 int m=5;				//povecanje N
 
 string coverter_int_array_to_string(int niz[], int broj,int src)
@@ -434,7 +434,7 @@ float F3()                           //3 od 3
 
 float F()
 {
-	return 20*F1()+5*F2()+F3();
+	return 1*F1()+1*F2()+F3();
 }
 
 void filter()   //filter od matrice skidamo preklapanje :)
@@ -624,14 +624,10 @@ bool vec_se_nalazi(vector<float> B, int g, string ga[700][100], int i)
 	return false;
 }
 
-void filter2(string ga[700][100], vector<float> glow,vector<float>& B,vector<float>& C)
+void filter2(string ga[700][100], vector<float> glow,vector<float>& B)
 {
 	int g=0;
 	vector<float> D(500);
-	for(int i=0; i<pop*m; i++)
-	{
-		C[i]=B[i];
-	}
 	B[0]=glow[pop*m-1];
 	D[0]=glow[pop*m-1];
 	g++;
@@ -644,12 +640,12 @@ void filter2(string ga[700][100], vector<float> glow,vector<float>& B,vector<flo
 			g++;
 		}
 	}
-	if(B[pop]<0)
+	if(B[pop]<0 || B[pop]>pop*m-1)
 	{
 		cout<<"JOJ";
 		for(int i=0; i<pop; i++)
 		{
-			if(B[i]<0)
+			if(B[pop]<0 || B[pop]>pop*m-1)
 			{
 				B[i]=rand()% pop*m;
 			}
@@ -674,10 +670,29 @@ bool ima_ponavljanja(string a)
 	return false;
 }
 
+float naj_dem()
+{	
+	float demand1=0;
+	float demand2=0;
+	int k;
+	for(int i=0; i<n; i++)
+				{
+					for(int j=k; j<n ; j++)
+						{
+							if(IVT[i][j]>=0)
+							{
+								demand1+=(float)need[i][j];
+							}
+							demand2+=(float)need[i][j];
+						}
+						k++;
+					}	
+				return demand1/demand2;
+}
+
 main()
 {   string rset[500];
 	vector<float> A(500), B(500); 
-	vector<float> C(500);
 	float popularity[10000];
 	srand(time(0));
 	scanf("%d",&n);
@@ -686,11 +701,13 @@ main()
 	for(int i=0; i<n-1 ;i++) //pokretanje dijkstre za const
 	{
     	dijkstra(time1, i,n);
-	}	
-	
+	}
+		
+	int max=-INT_MAX;
 	filter();
 	int br=convert();   
-	
+	string naj[brute];
+	float najdem;
 	string ga[700][100];
 	string gapom[pop][brute];
 	int t;
@@ -719,7 +736,7 @@ main()
 	
 	for(int fo=0; fo<generacion; fo++)       //geneticki
 	{
-		//cout<<fo<<" ";
+		cout<<fo<<" ";
 		for(int i=0; i<pop; i=i+2)
 		{
 			for(int j=0; j<brute; j++)      //inter-string crossover sa koef 0.5
@@ -799,9 +816,19 @@ main()
 						ran=*(lol+ran);
 						string koj;
 						koj=ga[i][mesta[brute-1]];
+						string koji;
+						koji=ga[i][mesta[brute-2]];
 						//cout<<koj<<"| "<<ga[i][mesta[brute-2]]<<" "<<ran<<endl;
 						ga[i][mesta[brute-1]]=crossover_s(koj,ga[i][mesta[brute-2]],ran);
 						ga[i][mesta[brute-2]]=crossover_s(ga[i][mesta[brute-2]],koj,ran);
+						if(ima_ponavljanja(ga[i][brute-1]))
+						{
+							ga[i][mesta[brute-1]]=koj;
+						}
+						if(ima_ponavljanja(ga[i][mesta[brute-2]]))
+						{
+							ga[i][mesta[brute-2]]=koj;
+						}
 			}
 		}
 		
@@ -810,7 +837,7 @@ main()
 			mesta[i]=i;
 		}
 		
-		for(int i=0; i<pop*m; i++)				//unistavanje ponavljanja
+	/*	for(int i=0; i<pop*m; i++)				//unistavanje ponavljanja
 		{
 			for(int j=0; j<brute; j++)
 			{
@@ -824,7 +851,7 @@ main()
    					g=0; t=0;
 				}
 			}
-		}
+		}*/
 
 		for(int i=0; i<pop*m; i++)
 		{
@@ -849,31 +876,24 @@ main()
 		generisi_B(B);
 		generisi_A(A,popularity);
 
-   		for (int i = 0; i < pop*m-1; i++)      
-		{	     
-       		for (int j = 0; j < pop*m-i-1; j++) 
-       		{
-           		if (A[j] > A[j+1])
-           		{
-           			int pom;
-           			pom=A[j];
-           			A[j]=A[j+1];
-           			A[j+1]=pom;
-           			pom=B[j];
-           			B[j]=B[j+1];
-           			B[j+1]=pom;
-				}
-     		}       
-		}	
+		if(A[pop*m-1]>max)
+		{
+			max=A[pop*m-1];
+			najdem=naj_dem();
+			for(int j=0; j<brute; j++)
+			{
+				naj[j]=ga[(int)B[pop*m-1]][j];
+			}
+		}
 
 	//	cout<<endl;
-		filter2(ga,B,A,C);	
+		filter2(ga,B,A);	               //filtrira iste rute i odbacuje lose
 	
-	/*	for(int i=0; i<pop; i++)
+		for(int i=0; i<pop; i++)
 		{
 			cout<<A[i]<<" ";
 		}
-		cout<<endl;*/
+		cout<<endl;
 	
 		for(int i=0; i<pop; i++)
 		{
@@ -903,8 +923,9 @@ main()
 	}		
 	for(int i=0; i<brute; i++)
 	{
-		cout<<ga[0][i]<<"| ";
+		cout<<naj[i]<<"| ";
 	}
+	cout<<najdem*100;
 }
 
 
