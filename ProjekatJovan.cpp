@@ -24,12 +24,14 @@ string rfilter[10000];       //niz
 int ruta[100];               //ness pomocno
 int n;  int duzina;          //n-broj noda duzina-ness pomocno
 int K=10; int xm=35;         //K,xm-const          menjam po slucaju!!!
-int brute=4;                 //broj ruta u grafu   menjam po slucaju!!!
+int brute=3;                 //broj ruta u grafu   menjam po slucaju!!!
 float af2=1;                 //konstanta za F2
 int U=5;                     //penalty
 int pop=20;         	    //populacija koju koriatim
-int generacion=1000;		//broj generacija
-int m=5;				//povecanje N
+int generacion=100;		//broj generacija
+int m=7;				//povecanje N
+int ogranicenje=5;		//ogranicenje izmedju rand i naj
+
 
 string coverter_int_array_to_string(int niz[], int broj,int src)
 {
@@ -186,12 +188,16 @@ float beta3_generator()  //generise beta1
 
 void generate_need()                //generise potrebu izmedju i j
 {
+	int k; 
+	k=1;
 	for(int i=0; i<n; i++)
 	{
-		for(int j=0; j<n; j++)
+		for(int j=k; j<n; j++)
 		{
-			need[i][j]=rand() % 10+1;
+			need[i][j]=rand() % 20+1;
+			need[j][i]=need[i][j];
 		}
+		k++;
 	}
 }
 
@@ -434,7 +440,7 @@ float F3()                           //3 od 3
 
 float F()
 {
-	return 1*F1()+1*F2()+F3();
+	return F1()+10*F2()+F3();
 }
 
 void filter()   //filter od matrice skidamo preklapanje :)
@@ -642,7 +648,6 @@ void filter2(string ga[700][100], vector<float> glow,vector<float>& B)
 	}
 	if(B[pop]<0 || B[pop]>pop*m-1)
 	{
-		cout<<"JOJ";
 		for(int i=0; i<pop; i++)
 		{
 			if(B[pop]<0 || B[pop]>pop*m-1)
@@ -674,7 +679,7 @@ float naj_dem()
 {	
 	float demand1=0;
 	float demand2=0;
-	int k;
+	int k=0;
 	for(int i=0; i<n; i++)
 				{
 					for(int j=k; j<n ; j++)
@@ -698,6 +703,27 @@ main()
 	scanf("%d",&n);
 	generate_time();
 	generate_need();
+	int k=1;
+/*	for(int i=0; i<n ;i++) //pokretanje dijkstre za const
+	{
+    	for(int j=k; j<n ;j++) //pokretanje dijkstre za const
+		{
+    		cin>>time1[i][j];
+    		time1[j][i]=time1[i][j];
+		}
+		k++;
+	}
+	k=1;
+	for(int i=0; i<n ;i++) //pokretanje dijkstre za const
+	{
+    	for(int j=k; j<n ;j++) //pokretanje dijkstre za const
+		{
+    		cin>>need[i][j];
+    		need[j][i]=need[i][j];
+		}
+		k++;
+	}*/
+	
 	for(int i=0; i<n-1 ;i++) //pokretanje dijkstre za const
 	{
     	dijkstra(time1, i,n);
@@ -714,7 +740,6 @@ main()
     int g;
     int ind;
 	int mesta[br];
-	float satis;
 	
 	for(int i=0; i<br; i++)
 	{
@@ -736,7 +761,6 @@ main()
 	
 	for(int fo=0; fo<generacion; fo++)       //geneticki
 	{
-		cout<<fo<<" ";
 		for(int i=0; i<pop; i=i+2)
 		{
 			for(int j=0; j<brute; j++)      //inter-string crossover sa koef 0.5
@@ -770,13 +794,19 @@ main()
 			{
 				for(int j=0; j<brute; j++)
 				{
-   					t=rand()%(br-j);
-   					g=mesta[t];
-   					mesta[t]=mesta[br-1-j];
-   					mesta[br-1-j]=g;
-   					ga[pop*moe+i][j]=rfilter[g];
-   					g=0; t=0;
-   					//ga[pop*moe+i][j]=ga[i][j];
+					if(moe<ogranicenje)
+					{
+   						t=rand()%(br-j);
+   						g=mesta[t];
+   						mesta[t]=mesta[br-1-j];
+   						mesta[br-1-j]=g;
+   						ga[pop*moe+i][j]=rfilter[g];
+   						g=0; t=0;
+   					}
+   					else
+					{
+						ga[pop*moe+i][j]=ga[i][j];
+					}
 				}			
 			}
 		}
@@ -863,16 +893,6 @@ main()
 			popularity[i]=F()/100;
 		}
 		
-	/*	for(int i=0; i<pop*m; i++)
-		{
-			for(int j=0; j<brute; j++)      		
-			{
-				cout<<ga[i][j]<<"| ";
-			}
-			cout<<popularity[i]<<endl;
-		}
-		cout<<endl;*/
-
 		generisi_B(B);
 		generisi_A(A,popularity);
 
@@ -889,11 +909,11 @@ main()
 	//	cout<<endl;
 		filter2(ga,B,A);	               //filtrira iste rute i odbacuje lose
 	
-		for(int i=0; i<pop; i++)
+		/*for(int i=0; i<pop; i++)
 		{
 			cout<<A[i]<<" ";
 		}
-		cout<<endl;
+		cout<<endl;*/
 	
 		for(int i=0; i<pop; i++)
 		{
