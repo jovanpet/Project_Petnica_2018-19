@@ -24,22 +24,25 @@ string rfilter[10000];       //niz
 int ruta[100];               //ness pomocno
 int n;  int duzina;          //n-broj noda duzina-ness pomocno
 int K=10; int xm=35;         //K,xm-const          menjam po slucaju!!!
-int brute=3;                 //broj ruta u grafu   menjam po slucaju!!!
+int brute=4;                 //broj ruta u grafu   menjam po slucaju!!!
 float af2=1;                 //konstanta za F2
 int U=5;                     //penalty
-int pop=20;         	    //populacija koju koriatim
-int generacion=100;		//broj generacija
-int m=7;				//povecanje N
-int ogranicenje=5;		//ogranicenje izmedju rand i naj
+int pop=30;         	    //populacija koju koriatim
+int generacion=1000;		//broj generacija
+int m=5;				//povecanje N
+int ogranicenje=3;		//ogranicenje izmedju rand i naj
 
 
 string coverter_int_array_to_string(int niz[], int broj,int src)
 {
 	ostringstream os;
 	os<<src; os<< ' ';
-    for (int i=0; i<broj; i++) {
+    for (int i=0; i<broj; i++) 
+	{
         os << niz[i];
+        
         ruta[i]=0;
+        
         if(i!=broj-1) os<< ' ';
     }
 
@@ -82,7 +85,7 @@ void printPath(int parent[], int j,int needer)  //vraca nazad put koji je tacno 
 	}*/
 }
  
-int printSolution(int dist[], int n, int parent[], int V, int src)  //vraca node najkraceg puta i vreme izmedju
+int printSolution(int dist[], int parent[], int V, int src)  //vraca node najkraceg puta i vreme izmedju
 {
     for (int i = src+1; i < V; i++)
     {
@@ -129,7 +132,7 @@ void dijkstra(int graph[100][100], int src, int V) //od nekog time matrix(koliko
             } 
     }
 
-    printSolution(dist, V, parent,n, src);
+    printSolution(dist, parent,V, src);
 }
 
 int propability(int zbir,int num) //biranje broja po nekoj verovatnoci
@@ -446,16 +449,16 @@ float F()
 void filter()   //filter od matrice skidamo preklapanje :)
 {
 	int k=1;
-	for(int p=0; p<5; p++)
+	for(int p=0; p<n; p++)
 {
-	for(int pov=k; pov<5 ; pov++)
+	for(int pov=k; pov<n ; pov++)
 	{
 		if(rute[p][pov]!="t")
 		{
 		int h=1;
-		for(int i=0; i<5; i++)
+		for(int i=0; i<n; i++)
 		{
-			for(int j=h; j<5 ; j++)
+			for(int j=h; j<n ; j++)
 			{
 				if((i!=p || j!=pov) && rute[i][j]!="t")
 				{
@@ -679,7 +682,7 @@ float naj_dem()
 {	
 	float demand1=0;
 	float demand2=0;
-	int k=0;
+	int k=1;
 	for(int i=0; i<n; i++)
 				{
 					for(int j=k; j<n ; j++)
@@ -700,30 +703,11 @@ main()
 	vector<float> A(500), B(500); 
 	float popularity[10000];
 	srand(time(0));
-	scanf("%d",&n);
+	//scanf("%d",&n);
+	n=24;
 	generate_time();
 	generate_need();
 	int k=1;
-/*	for(int i=0; i<n ;i++) //pokretanje dijkstre za const
-	{
-    	for(int j=k; j<n ;j++) //pokretanje dijkstre za const
-		{
-    		cin>>time1[i][j];
-    		time1[j][i]=time1[i][j];
-		}
-		k++;
-	}
-	k=1;
-	for(int i=0; i<n ;i++) //pokretanje dijkstre za const
-	{
-    	for(int j=k; j<n ;j++) //pokretanje dijkstre za const
-		{
-    		cin>>need[i][j];
-    		need[j][i]=need[i][j];
-		}
-		k++;
-	}*/
-	
 	for(int i=0; i<n-1 ;i++) //pokretanje dijkstre za const
 	{
     	dijkstra(time1, i,n);
@@ -732,20 +716,21 @@ main()
 	int max=-INT_MAX;
 	filter();
 	int br=convert();   
-	string naj[brute];
+	string naj[100];
 	float najdem;
 	string ga[700][100];
 	string gapom[pop][brute];
 	int t;
     int g;
     int ind;
-	int mesta[br];
-	
+	int mesta[1000];
+	while(true)
+	{
+	max=-INT_MAX;
 	for(int i=0; i<br; i++)
 	{
 		mesta[i]=i;
 	}
-	
 	for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
 	{
 		for(int j=0; j<brute; j++)
@@ -788,7 +773,7 @@ main()
 			mesta[i]=i;
 		}
 	
-		for(int moe=1; moe<m; moe++)				//uvecaj matricu
+		for(int moe=1; moe<m; moe++)				
 		{				
 			for(int i=0; i<pop; i++)                 
 			{
@@ -816,10 +801,11 @@ main()
 			mesta[i]=i;
 		}
 		
-		for(int i=0; i<pop*m; i++)					//inter-string crossover sa koef 0.5
+		for(int i=pop; i<pop*m; i++)					//inter-string crossover sa koef 0.5
 		{	
 			if(moze(ga,i))
 			{
+				
 					for(int plo=0; plo<2; plo++)
   					{
    						t=rand()%(brute-plo);
@@ -909,12 +895,6 @@ main()
 	//	cout<<endl;
 		filter2(ga,B,A);	               //filtrira iste rute i odbacuje lose
 	
-		/*for(int i=0; i<pop; i++)
-		{
-			cout<<A[i]<<" ";
-		}
-		cout<<endl;*/
-	
 		for(int i=0; i<pop; i++)
 		{
 			for(int j=0; j<brute; j++)
@@ -946,6 +926,7 @@ main()
 		cout<<naj[i]<<"| ";
 	}
 	cout<<najdem*100;
+}
 }
 
 
