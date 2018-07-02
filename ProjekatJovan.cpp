@@ -27,17 +27,22 @@ int K=10; int xm=35;         //K,xm-const          menjam po slucaju!!!
 int brute=4;                 //broj ruta u grafu   menjam po slucaju!!!
 float af2=1;                 //konstanta za F2
 int U=5;                     //penalty
-int pop=20;         	    //populacija koju koriatim
-int generacion=500;		//broj generacija
+int pop=30;         	    //populacija koju koriatim
+int generacion=1000;		//broj generacija
 int m=5;				//povecanje N
+int ogranicenje=3;		//ogranicenje izmedju rand i naj
+
 
 string coverter_int_array_to_string(int niz[], int broj,int src)
 {
 	ostringstream os;
 	os<<src; os<< ' ';
-    for (int i=0; i<broj; i++) {
+    for (int i=0; i<broj; i++) 
+	{
         os << niz[i];
+        
         ruta[i]=0;
+        
         if(i!=broj-1) os<< ' ';
     }
 
@@ -80,7 +85,7 @@ void printPath(int parent[], int j,int needer)  //vraca nazad put koji je tacno 
 	}*/
 }
  
-int printSolution(int dist[], int n, int parent[], int V, int src)  //vraca node najkraceg puta i vreme izmedju
+int printSolution(int dist[], int parent[], int V, int src)  //vraca node najkraceg puta i vreme izmedju
 {
     for (int i = src+1; i < V; i++)
     {
@@ -127,7 +132,7 @@ void dijkstra(int graph[100][100], int src, int V) //od nekog time matrix(koliko
             } 
     }
 
-    printSolution(dist, V, parent,n, src);
+    printSolution(dist, parent,V, src);
 }
 
 int propability(int zbir,int num) //biranje broja po nekoj verovatnoci
@@ -186,12 +191,16 @@ float beta3_generator()  //generise beta1
 
 void generate_need()                //generise potrebu izmedju i j
 {
+	int k; 
+	k=1;
 	for(int i=0; i<n; i++)
 	{
-		for(int j=0; j<n; j++)
+		for(int j=k; j<n; j++)
 		{
-			need[i][j]=rand() % 10+1;
+			need[i][j]=rand() % 20+1;
+			need[j][i]=need[i][j];
 		}
+		k++;
 	}
 }
 
@@ -434,22 +443,22 @@ float F3()                           //3 od 3
 
 float F()
 {
-	return 20*F1()+5*F2()+F3();
+	return F1()+10*F2()+F3();
 }
 
 void filter()   //filter od matrice skidamo preklapanje :)
 {
 	int k=1;
-	for(int p=0; p<5; p++)
+	for(int p=0; p<n; p++)
 {
-	for(int pov=k; pov<5 ; pov++)
+	for(int pov=k; pov<n ; pov++)
 	{
 		if(rute[p][pov]!="t")
 		{
 		int h=1;
-		for(int i=0; i<5; i++)
+		for(int i=0; i<n; i++)
 		{
-			for(int j=h; j<5 ; j++)
+			for(int j=h; j<n ; j++)
 			{
 				if((i!=p || j!=pov) && rute[i][j]!="t")
 				{
@@ -624,14 +633,10 @@ bool vec_se_nalazi(vector<float> B, int g, string ga[700][100], int i)
 	return false;
 }
 
-void filter2(string ga[700][100], vector<float> glow,vector<float>& B,vector<float>& C)
+void filter2(string ga[700][100], vector<float> glow,vector<float>& B)
 {
 	int g=0;
 	vector<float> D(500);
-	for(int i=0; i<pop*m; i++)
-	{
-		C[i]=B[i];
-	}
 	B[0]=glow[pop*m-1];
 	D[0]=glow[pop*m-1];
 	g++;
@@ -644,12 +649,11 @@ void filter2(string ga[700][100], vector<float> glow,vector<float>& B,vector<flo
 			g++;
 		}
 	}
-	if(B[pop]<0)
+	if(B[pop]<0 || B[pop]>pop*m-1)
 	{
-		cout<<"JOJ";
 		for(int i=0; i<pop; i++)
 		{
-			if(B[i]<0)
+			if(B[pop]<0 || B[pop]>pop*m-1)
 			{
 				B[i]=rand()% pop*m;
 			}
@@ -674,36 +678,59 @@ bool ima_ponavljanja(string a)
 	return false;
 }
 
+float naj_dem()
+{	
+	float demand1=0;
+	float demand2=0;
+	int k=1;
+	for(int i=0; i<n; i++)
+				{
+					for(int j=k; j<n ; j++)
+						{
+							if(IVT[i][j]>=0)
+							{
+								demand1+=(float)need[i][j];
+							}
+							demand2+=(float)need[i][j];
+						}
+						k++;
+					}	
+				return demand1/demand2;
+}
+
 main()
 {   string rset[500];
 	vector<float> A(500), B(500); 
-	vector<float> C(500);
 	float popularity[10000];
 	srand(time(0));
-	scanf("%d",&n);
+	//scanf("%d",&n);
+	n=24;
 	generate_time();
 	generate_need();
+	int k=1;
 	for(int i=0; i<n-1 ;i++) //pokretanje dijkstre za const
 	{
     	dijkstra(time1, i,n);
-	}	
-	
+	}
+		
+	int max=-INT_MAX;
 	filter();
 	int br=convert();   
-	
+	string naj[100];
+	float najdem;
 	string ga[700][100];
 	string gapom[pop][brute];
 	int t;
     int g;
     int ind;
-	int mesta[br];
-	float satis;
-	
+	int mesta[1000];
+	while(true)
+	{
+	max=-INT_MAX;
 	for(int i=0; i<br; i++)
 	{
 		mesta[i]=i;
 	}
-	
 	for(int i=0; i<pop; i++)                  //generisemo pocetne route setove
 	{
 		for(int j=0; j<brute; j++)
@@ -719,7 +746,6 @@ main()
 	
 	for(int fo=0; fo<generacion; fo++)       //geneticki
 	{
-		//cout<<fo<<" ";
 		for(int i=0; i<pop; i=i+2)
 		{
 			for(int j=0; j<brute; j++)      //inter-string crossover sa koef 0.5
@@ -747,19 +773,25 @@ main()
 			mesta[i]=i;
 		}
 	
-		for(int moe=1; moe<m; moe++)				//uvecaj matricu
+		for(int moe=1; moe<m; moe++)				
 		{				
 			for(int i=0; i<pop; i++)                 
 			{
 				for(int j=0; j<brute; j++)
 				{
-   					t=rand()%(br-j);
-   					g=mesta[t];
-   					mesta[t]=mesta[br-1-j];
-   					mesta[br-1-j]=g;
-   					ga[pop*moe+i][j]=rfilter[g];
-   					g=0; t=0;
-   					//ga[pop*moe+i][j]=ga[i][j];
+					if(moe<ogranicenje)
+					{
+   						t=rand()%(br-j);
+   						g=mesta[t];
+   						mesta[t]=mesta[br-1-j];
+   						mesta[br-1-j]=g;
+   						ga[pop*moe+i][j]=rfilter[g];
+   						g=0; t=0;
+   					}
+   					else
+					{
+						ga[pop*moe+i][j]=ga[i][j];
+					}
 				}			
 			}
 		}
@@ -769,10 +801,11 @@ main()
 			mesta[i]=i;
 		}
 		
-		for(int i=0; i<pop*m; i++)					//inter-string crossover sa koef 0.5
+		for(int i=pop; i<pop*m; i++)					//inter-string crossover sa koef 0.5
 		{	
 			if(moze(ga,i))
 			{
+				
 					for(int plo=0; plo<2; plo++)
   					{
    						t=rand()%(brute-plo);
@@ -799,9 +832,19 @@ main()
 						ran=*(lol+ran);
 						string koj;
 						koj=ga[i][mesta[brute-1]];
+						string koji;
+						koji=ga[i][mesta[brute-2]];
 						//cout<<koj<<"| "<<ga[i][mesta[brute-2]]<<" "<<ran<<endl;
 						ga[i][mesta[brute-1]]=crossover_s(koj,ga[i][mesta[brute-2]],ran);
 						ga[i][mesta[brute-2]]=crossover_s(ga[i][mesta[brute-2]],koj,ran);
+						if(ima_ponavljanja(ga[i][brute-1]))
+						{
+							ga[i][mesta[brute-1]]=koj;
+						}
+						if(ima_ponavljanja(ga[i][mesta[brute-2]]))
+						{
+							ga[i][mesta[brute-2]]=koj;
+						}
 			}
 		}
 		
@@ -810,7 +853,7 @@ main()
 			mesta[i]=i;
 		}
 		
-		for(int i=0; i<pop*m; i++)				//unistavanje ponavljanja
+	/*	for(int i=0; i<pop*m; i++)				//unistavanje ponavljanja
 		{
 			for(int j=0; j<brute; j++)
 			{
@@ -824,7 +867,7 @@ main()
    					g=0; t=0;
 				}
 			}
-		}
+		}*/
 
 		for(int i=0; i<pop*m; i++)
 		{
@@ -836,44 +879,21 @@ main()
 			popularity[i]=F()/100;
 		}
 		
-	/*	for(int i=0; i<pop*m; i++)
-		{
-			for(int j=0; j<brute; j++)      		
-			{
-				cout<<ga[i][j]<<"| ";
-			}
-			cout<<popularity[i]<<endl;
-		}
-		cout<<endl;*/
-
 		generisi_B(B);
 		generisi_A(A,popularity);
 
-   		for (int i = 0; i < pop*m-1; i++)      
-		{	     
-       		for (int j = 0; j < pop*m-i-1; j++) 
-       		{
-           		if (A[j] > A[j+1])
-           		{
-           			int pom;
-           			pom=A[j];
-           			A[j]=A[j+1];
-           			A[j+1]=pom;
-           			pom=B[j];
-           			B[j]=B[j+1];
-           			B[j+1]=pom;
-				}
-     		}       
-		}	
+		if(A[pop*m-1]>max)
+		{
+			max=A[pop*m-1];
+			najdem=naj_dem();
+			for(int j=0; j<brute; j++)
+			{
+				naj[j]=ga[(int)B[pop*m-1]][j];
+			}
+		}
 
 	//	cout<<endl;
-		filter2(ga,B,A,C);	
-	
-	/*	for(int i=0; i<pop; i++)
-		{
-			cout<<A[i]<<" ";
-		}
-		cout<<endl;*/
+		filter2(ga,B,A);	               //filtrira iste rute i odbacuje lose
 	
 		for(int i=0; i<pop; i++)
 		{
@@ -903,8 +923,10 @@ main()
 	}		
 	for(int i=0; i<brute; i++)
 	{
-		cout<<ga[0][i]<<"| ";
+		cout<<naj[i]<<"| ";
 	}
+	cout<<najdem*100;
+}
 }
 
 
