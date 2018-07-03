@@ -801,7 +801,7 @@ main()
 			mesta[i]=i;
 		}
 		
-		for(int i=pop; i<pop*m; i++)					//inter-string crossover sa koef 0.5
+		for(int i=pop; i<pop*m; i++)					//intra-string crossover sa koef 0.5
 		{	
 			if(moze(ga,i))
 			{
