@@ -843,7 +843,7 @@ main()
 						}
 						if(ima_ponavljanja(ga[i][mesta[brute-2]]))
 						{
-							ga[i][mesta[brute-2]]=koj;
+							ga[i][mesta[brute-2]]=koji;
 						}
 			}
 		}
