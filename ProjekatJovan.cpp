@@ -27,9 +27,9 @@ int K=10; int xm=35;         //K,xm-const          menjam po slucaju!!!
 int brute=4;                 //broj ruta u grafu   menjam po slucaju!!!
 float af2=1;                 //konstanta za F2
 int U=5;                     //penalty
-int pop=30;         	    //populacija koju koriatim
-int generacion=1000;		//broj generacija
-int m=5;				//povecanje N
+int pop=25;         	    //populacija koju koriatim
+int generacion=1500;		//broj generacija
+int m=6;				//povecanje N
 int ogranicenje=3;		//ogranicenje izmedju rand i naj
 
 
@@ -707,7 +707,6 @@ main()
 	n=24;
 	generate_time();
 	generate_need();
-	int k=1;
 	for(int i=0; i<n-1 ;i++) //pokretanje dijkstre za const
 	{
     	dijkstra(time1, i,n);
