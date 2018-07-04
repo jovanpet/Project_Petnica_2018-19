@@ -26,7 +26,7 @@ int n;  int duzina;          //n-broj noda duzina-ness pomocno
 int K=10; int xm=35;         //K,xm-const          menjam po slucaju!!!
 int brute=4;                 //broj ruta u grafu   menjam po slucaju!!!
 float af2=1;                 //konstanta za F2
-int U=5;                     //penalty
+int U=10;                     //penalty
 int pop=25;         	    //populacija koju koriatim
 int generacion=1000;		//broj generacija
 int m=6;				//povecanje N
@@ -711,7 +711,25 @@ main()
 	{
     	dijkstra(time1, i,n);
 	}
-		
+	freopen ("dokument.txt","w",stdout);
+	for(int i=0; i<n; i++)
+	{
+		for(int j=0; j<n; j++)
+		{
+			printf("%d ",time1[i][j]);
+		}
+		printf("\n");
+	}
+	
+	for(int i=0; i<n; i++)
+	{
+		for(int j=0; j<n; j++)
+		{
+			printf("%d ",need[i][j]);
+		}
+		printf("\n");
+	}
+	
 	int max=-INT_MAX;
 	filter();
 	int br=convert();   
@@ -723,8 +741,8 @@ main()
     int g;
     int ind;
 	int mesta[1000];
-	while(true)
-	{
+/*	while(true)
+	{*/
 	max=-INT_MAX;
 	for(int i=0; i<br; i++)
 	{
@@ -745,9 +763,9 @@ main()
 	
 	for(int fo=0; fo<generacion; fo++)       //geneticki
 	{
-		for(int i=0; i<pop; i=i+2)  //inter crossover
+		for(int i=0; i<pop; i=i+2)  //inter-string crossover sa koef 0.5
 		{
-			for(int j=0; j<brute; j++)      //inter-string crossover sa koef 0.5
+			for(int j=0; j<brute; j++)      
 			{
 				if(rand()%2==0)
 				{
@@ -915,10 +933,12 @@ main()
 	}		
 	for(int i=0; i<brute; i++)
 	{
-		cout<<naj[i]<<"| ";
+			printf("%s ",naj[i].c_str());
 	}
-	cout<<najdem*100;
-}
+	
+	printf("%f |",najdem);
+	fclose (stdout);	
+//}
 }
 
 
