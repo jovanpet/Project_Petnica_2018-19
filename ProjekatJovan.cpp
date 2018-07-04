@@ -28,9 +28,9 @@ int brute=4;                 //broj ruta u grafu   menjam po slucaju!!!
 float af2=1;                 //konstanta za F2
 int U=5;                     //penalty
 int pop=25;         	    //populacija koju koriatim
-int generacion=1500;		//broj generacija
+int generacion=1000;		//broj generacija
 int m=6;				//povecanje N
-int ogranicenje=3;		//ogranicenje izmedju rand i naj
+int ogranicenje=4;		//ogranicenje izmedju rand i naj
 
 
 string coverter_int_array_to_string(int niz[], int broj,int src)
@@ -745,7 +745,7 @@ main()
 	
 	for(int fo=0; fo<generacion; fo++)       //geneticki
 	{
-		for(int i=0; i<pop; i=i+2)
+		for(int i=0; i<pop; i=i+2)  //inter crossover
 		{
 			for(int j=0; j<brute; j++)      //inter-string crossover sa koef 0.5
 			{
@@ -772,7 +772,7 @@ main()
 			mesta[i]=i;
 		}
 	
-		for(int moe=1; moe<m; moe++)				
+		for(int moe=1; moe<m; moe++)				//prosiri
 		{				
 			for(int i=0; i<pop; i++)                 
 			{
@@ -851,26 +851,10 @@ main()
 		{
 			mesta[i]=i;
 		}
-		
-	/*	for(int i=0; i<pop*m; i++)				//unistavanje ponavljanja
-		{
-			for(int j=0; j<brute; j++)
-			{
-				if(ima_ponavljanja(ga[i][j]))
-				{
-					t=rand()%(br-j);
-   					g=mesta[t];
-   					mesta[t]=mesta[br-1-j];
-   					mesta[br-1-j]=g;
-   					ga[i][j]=rfilter[g];
-   					g=0; t=0;
-				}
-			}
-		}*/
 
-		for(int i=0; i<pop*m; i++)
+		for(int i=0; i<pop*m; i++)   //generisi IVT i popularity
 		{
-			for(int j=0; j<brute; j++)      		//inter-string crossover sa koef 0.5
+			for(int j=0; j<brute; j++)      	
 			{
 				rset[j]=ga[i][j];
 			}
@@ -881,17 +865,35 @@ main()
 		generisi_B(B);
 		generisi_A(A,popularity);
 
-		if(A[pop*m-1]>max)
+		for (int i = 0; i < pop*m-1; i++)       //sortira oba niza
+    	{        
+           for (int j = 0; j < pop*m-i-1; j++)  
+           { 
+               if (A[j] > A[j+1]) 
+               { 
+                 int pom; 
+                 pom=A[j]; 
+                 A[j]=A[j+1]; 
+                 A[j+1]=pom; 
+                 pom=B[j]; 
+                 B[j]=B[j+1]; 
+                 B[j+1]=pom; 
+        		} 
+         	}        
+    	}  
+
+		if(A[pop*m-1]>max)  //nalazi najbolji
 		{
 			max=A[pop*m-1];
-			najdem=naj_dem();
 			for(int j=0; j<brute; j++)
 			{
 				naj[j]=ga[(int)B[pop*m-1]][j];
+				rset[j]=ga[(int)B[pop*m-1]][j];
 			}
-		}
+			generate_IVT(rset);
+			najdem=naj_dem();
+		} 
 
-	//	cout<<endl;
 		filter2(ga,B,A);	               //filtrira iste rute i odbacuje lose
 	
 		for(int i=0; i<pop; i++)
@@ -910,15 +912,6 @@ main()
 			}
 		}
 		
-		/*for(int i=0; i<pop; i++)
-		{
-			for(int j=0; j<brute; j++)      		
-			{
-				cout<<ga[i][j]<<"| ";
-			}
-			cout<<popularity[(int)A[i]]<<endl;
-		}
-		cout<<endl;*/
 	}		
 	for(int i=0; i<brute; i++)
 	{
